@@ -3,9 +3,9 @@ import requests
 # Global dictionary to store the mapping of "firing" alerts to their message IDs
 alert_message_ids = {}
 prometheus_alert_message_ids = {}
-team_dict = {"hotel": "-921082115", "devops": "-1001960208571", "ticket": "-922276741", "shared": "-906376104"}
-bot_token = "5986138329:AAED6SDk3LwN2Je0eA2zK4_pQVPnCfYd-sw"
-chat_id_devops = "-1001960208571"
+team_dict = {"hotel": "", "devops": "", "ticket": "", "shared": ""}
+bot_token = ""
+chat_id_devops = ""
 
 
 def send_telegram_message(bot_token, chat_id, message, reply_to_message_id=None):
