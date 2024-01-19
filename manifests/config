@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    certificate-authority: /root/.minikube/ca.crt
+    server: https://192.168.49.2:8443
+  name: my-cluster
+contexts:
+- context:
+  name: default-context
+  context:
+    cluster: my-cluster
+    user: sa-name
+current-context: default-context
+users:
+- name: sa-name
+  user:
+    token: eyJhbGciOiJSUzI1NiIsImtpZCI6IjY2bTVQckozVmxfeF9CT20tbmQzM3p4LXlwYnl1S1lpZHdqV1FMcHc0b1EifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InNlY3JldC1zYS1zYW1wbGUiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoic2EtbmFtZSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjIyNzI2M2MxLTgwMzYtNGUzOS1hZTFkLTI2Mjc2ODE4YmQwZSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OnNhLW5hbWUifQ.K6ITF3bqnxRuRq1E6dg1DpHyOWZrG86yTAbMBtLr4esSgVZ37YBTLrR9PzASLkDC0a1MuwqX5h0YOmbSuvfkG5ff0eZYRVaLFsy7pmFlIB4X8mDdrATa_5BTjla4iZrCJ_BCsYGuFyf0n3_g51YpmOc8yr5JLPi9Zqg5OVyOrMTqXphho6EpfCAOwgYBulBDG3y5McCsKVolH9XJVa8HThkvgK8xdteEYKUaE3Sjrp7mgmNPYPYSNAeLMcsPy4KoGIQMmTjTJgg9cj8WQcW_eNedITAi82mjhHp0_KVh2TWm04YLGxJPT3UeSY9Qax8A70smpn81JFG7BoOiyZk7Ug
+

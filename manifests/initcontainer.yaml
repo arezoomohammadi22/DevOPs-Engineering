@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: static-web
+spec:
+  initContainers:
+    # an init containers that create directory
+    - name: init-create-dir
+      image: busybox
+      command: ["/bin/sh", "-c", "sleep 5 && echo 'creating dir'"]
+  containers:
+    # an app
+    - name: app
+      image: alpine
+      command: ['sh', '-c', 'echo "app is running" && sleep infinity']
+
