@@ -1,0 +1,5 @@
+# vars.yml
+new_username: myuser
+user_password: mypassword
+sudoers_file: /etc/sudoers
+
