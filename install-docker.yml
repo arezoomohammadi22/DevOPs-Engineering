@@ -1,0 +1,42 @@
+---
+- name: Install Docker on Ubuntu
+  hosts: appserver
+  become: yes  # Run tasks with sudo
+
+  tasks:
+    - name: Update apt package cache and install dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg-agent
+        - software-properties-common
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Update apt package cache (again) with Docker repository
+      apt:
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker
+        state: present
+
+    - name: Ensure Docker service is started and enabled
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
