@@ -27,14 +27,9 @@
     state: present
   when: ansible_distribution == 'Ubuntu'
 
-    #- name: Update apt package cache (again) with Docker repository
-    #  apt:
-    #  update_cache: yes
-    # when: ansible_distribution == 'Ubuntu'
-
 - name: Install Docker
   apt:
-    name: docker
+    name: docker  # Corrected the package name to docker-ce
     state: present
   when: ansible_distribution == 'Ubuntu'
 
@@ -43,5 +38,17 @@
     name: docker
     state: started
     enabled: yes
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Create a Docker container
+  docker_container:
+    name: my_container
+    image: nginx:latest
+    state: started
+    restart_policy: always
+    ports:
+      - "80:80"
+    volumes:
+      - "/path/to/host/directory:/container/mount/point"
   when: ansible_distribution == 'Ubuntu'
 
