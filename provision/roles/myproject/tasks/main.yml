@@ -1,4 +1,25 @@
-- name: create file 
-  file:
-    path: /etc/some_directory
-    state: directory
+- set_fact:
+    package_name: httpd
+  when: ansible_os_family == "Redhat"
+
+- set_fact:
+    package_name: apache2
+  when: ansible_os_family == "Debian" or ansible_os_family == "Suse"
+
+- name: Install {{ package_name }} package
+  debug:
+    msg: '{{ package_name }}'
+  tags: [Install_Apache]
+
+- zypper:
+    name: '{{ package_name }}'
+    state: present
+  when: ansible_os_family == "Suse"
+  tags: [Install_Apache]
+
+- apt:
+    name: '{{ package_name }}'
+    state: present
+  when: ansible_os_family == "Debian"
+  tags: [Install_Apache]
+
