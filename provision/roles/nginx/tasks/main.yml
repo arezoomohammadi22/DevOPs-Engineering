@@ -1,0 +1,37 @@
+- name: Install Nginx on Ubuntu/Debian
+  apt:
+    name: nginx
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Install Nginx on CentOS/RHEL
+  yum:
+    name: nginx
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Configure Nginx virtual hosts
+  vars:
+    server_name: "{{ item.server_name }}"
+    root: "{{ item.root }}"
+  template:
+    src: nginx-vhost.conf.j2
+    dest: "/etc/nginx/sites-available/{{ item.name }}"
+  loop:
+    - { name: example1, server_name: example.com, root: /var/www/html/example1 }
+    - { name: example2, server_name: example.org, root: /var/www/example2 }
+
+- name: Enable Nginx virtual hosts
+  file:
+    src: "/etc/nginx/sites-available/{{ item.name }}"
+    dest: "/etc/nginx/sites-enabled/{{ item.name }}"
+    state: link
+  loop:
+    - { name: example1 }
+    - { name: example2 }
+
+- name: Reload Nginx service
+  service:
+    name: nginx
+    state: reloaded
+

@@ -27,14 +27,14 @@
     state: present
   when: ansible_distribution == 'Ubuntu'
 
-- name: Update apt package cache (again) with Docker repository
-  apt:
-    update_cache: yes
-  when: ansible_distribution == 'Ubuntu'
+    #- name: Update apt package cache (again) with Docker repository
+    #  apt:
+    #  update_cache: yes
+    # when: ansible_distribution == 'Ubuntu'
 
 - name: Install Docker
   apt:
-    name: docker-ce
+    name: docker
     state: present
   when: ansible_distribution == 'Ubuntu'
 
