@@ -1,0 +1,12 @@
+groups:
+- name: container_down.rules
+  rules:
+  - alert: ContainerDown
+    expr: up{job=~".+"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Container {{ $labels.container_name }} is down"
+      description: "Container {{ $labels.container_name }} is down on instance {{ $labels.instance }}."
+

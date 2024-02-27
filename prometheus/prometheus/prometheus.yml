@@ -1,0 +1,55 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'prometheus'
+
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets: ['prometheus_alertmanager_1:9093']
+
+rule_files:
+  - "/etc/prometheus/*.rules"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 10s
+    file_sd_configs:
+      - files:
+        - 'prometheus_targets.yaml'
+
+  - job_name: 'node'
+    scrape_interval: 10s
+    file_sd_configs:
+      - files:
+        - 'node_targets.json'
+
+  - job_name: 'nodes'
+    scrape_interval: 10s
+    static_configs:
+      - targets: [10.211.55.16:8080]
+  
+  - job_name: 'node01'
+    scrape_interval: 10s
+    static_configs:
+      - targets: [10.211.55.16:9100]
+
+  - job_name: 'blackbox'
+    scrape_interval: 10s
+    metrics_path: /probe
+    params:
+      module: [https_nikandish_2xx]
+    file_sd_configs:
+      - files:
+        - 'blackbox_targets.json'
+  - job_name: "Kubelet"
+    metrics_path: "/metrics/cadvisor"
+    scheme: "https"
+    honor_timestamps: true
+    bearer_token_file: /root/prometheus/token
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ['apisrv.sananetco.com']
