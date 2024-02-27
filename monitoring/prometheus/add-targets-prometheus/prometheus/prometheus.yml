@@ -1,0 +1,24 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'prometheus'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 10s
+    file_sd_configs:
+      - files:
+        - 'prometheus_targets.yaml'
+
+  - job_name: 'node'
+    scrape_interval: 10s
+    file_sd_configs:
+      - files:
+        - 'node_targets.json'
+
+  - job_name: 'nodes'
+    scrape_interval: 10s
+    static_configs:
+      - targets: [10.211.55.16:8080]
+

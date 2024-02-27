@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring
+
+  alertmanager:
+    image: prom/alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    networks:
+      - monitoring
+
+  jojo:
+    image: tyriis/alertmanager-discord-arm64
+    ports:
+      - 9094:9094
+    environment:
+      - DISCORD_WEBHOOK=https://discord.com/api/webhooks/1211753030932766720/h9E-IGEYA1A5HgIYUmgeXCcbeeITL7zcGqugimGcpGbk2EW_9kiC8o7dMCM_EPDNOWi4
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
+
