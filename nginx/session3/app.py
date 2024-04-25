@@ -5,7 +5,7 @@ import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pprint import pprint
 
-hostName = "10.211.55.18"
+hostName = "localhost"
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
