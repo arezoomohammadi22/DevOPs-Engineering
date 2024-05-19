@@ -1,20 +1,10 @@
 version: '3.4'
-
 services:
   web:
-    build: .
-    ports:
-      - "5000:5000"
-    depends_on:
-      - redis
+    image: nginx
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 1m30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  redis:
-    image: "redis:alpine"
-    ports:
-      - "6379:6379"
