@@ -32,3 +32,8 @@ spec:
       volumes:
         - name: postgres-storage
           emptyDir: {}
+
+###kubectl create namespace test-namespace
+###kubectl run -it --rm --restart=Never pg-client --image=postgres:13 --namespace=test-namespace -- bash
+
+#####psql -h postgres-service.default.svc.cluster.local -U myuser -d mydatabase
