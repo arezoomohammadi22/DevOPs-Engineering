@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: get-pods-services-sa-rolebinding
+  namespace: core
+subjects:
+- kind: ServiceAccount
+  name: my-service-account
+  namespace: core
+roleRef:
+  kind: Role
+  name: get-pods-services-sa-role
+  apiGroup: rbac.authorization.k8s.io
