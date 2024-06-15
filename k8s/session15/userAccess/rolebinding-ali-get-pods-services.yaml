@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: get-pods-services-rolebinding
+  namespace: core
+subjects:
+- kind: User
+  name: ali # Replace with the actual username of Ali
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: get-pods-services-role
+  apiGroup: rbac.authorization.k8s.io
