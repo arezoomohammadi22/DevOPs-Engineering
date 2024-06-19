@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webapp-config
+data:
+  DATABASE_URL: "mysql://user:password@mysql:3306/dbname"
+  APP_ENV: "production"
+  LOG_LEVEL: "info"
