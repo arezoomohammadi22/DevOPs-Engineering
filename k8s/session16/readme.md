@@ -3,7 +3,7 @@
 This project demonstrates how to deploy a Node.js application with a MySQL backend on Kubernetes. The setup includes using Kubernetes ConfigMaps for managing application configurations.
 
 ## Project Structure
-
+```sh
 k8s-webapp/
 ├── app.js
 ├── Dockerfile
@@ -14,7 +14,7 @@ k8s-webapp/
 ├── webapp-deployment.yaml
 ├── webapp-service.yaml
 └── mysql-init-job.yaml
-
+```
 
 ## Prerequisites
 
