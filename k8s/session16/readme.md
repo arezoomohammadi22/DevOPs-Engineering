@@ -34,3 +34,31 @@ mkdir k8s-webapp
 cd k8s-webapp
 npm init -y
 npm install express mysql
+
+```
+
+## test
+```sh
+mysql -h mysql -uuser -ppassword dbname
+SELECT * FROM test_table;
+exit
+kubectl delete pod mysql-client
+```
+or
+```sh
+kubectl get svc mysql
+NAME    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+mysql   ClusterIP   10.96.0.100     <none>        3306/TCP   5m
+kubectl port-forward svc/mysql 3306:3306
+```
+Connect to MySQL using a client tool:
+
+Use the MySQL client tool of your choice to connect to 127.0.0.1:3306 with the following credentials:
+```sh
+Username: user
+Password: password
+Database: dbname
+
+SELECT * FROM test_table;
+```
+
