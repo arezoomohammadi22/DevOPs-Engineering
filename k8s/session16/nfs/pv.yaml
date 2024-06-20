@@ -6,7 +6,7 @@ spec:
   capacity:
     storage: 10Gi
   accessModes:
-    - ReadWriteMany
+    - ReadWriteMany  # This access mode allows multiple nodes to read and write
   nfs:
     path: /exported/path
     server: <NFS_SERVER_IP>
