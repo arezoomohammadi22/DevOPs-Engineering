@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv
+  labels:
+    type: nfs  # Label to be matched by the PVC selector
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    path: /exported/path
+    server: <NFS_SERVER_IP>
