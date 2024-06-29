@@ -5,7 +5,8 @@ function App() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    fetch('/api/message')
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3000';
+    fetch(`${backendUrl}/api/message`)
       .then(response => response.json())
       .then(data => setMessage(data.message));
   }, []);
