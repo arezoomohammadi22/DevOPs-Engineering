@@ -19,5 +19,6 @@ RUN npm run build
 # Use a lighter image for production
 FROM nginx:alpine
 COPY --from=0 /usr/src/app/build /usr/share/nginx/html
+COPY .env /usr/share/nginx/html/.env
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
