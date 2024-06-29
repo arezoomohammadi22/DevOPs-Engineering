@@ -1,0 +1,28 @@
+frontend:
+  image: my-frontend-image
+  tag: latest
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 80
+  imagePullSecrets:
+    - name: regcred
+
+backend:
+  image: my-backend-image
+  tag: latest
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 3000
+  imagePullSecrets:
+    - name: regcred
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: my-app.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
