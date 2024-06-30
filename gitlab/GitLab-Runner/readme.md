@@ -16,7 +16,7 @@ sudo gitlab-runner register \
 ```
 
 ## Explanation of the Command:
-
+```sh
 --non-interactive: Run in non-interactive mode.
 --url "https://gitlab.sananetco.com/": URL of your GitLab instance.
 --registration-token "YOUR_REGISTRATION_TOKEN": The registration token provided by GitLab for your runner.
@@ -30,3 +30,5 @@ sudo gitlab-runner register \
 --docker-volumes "/certs/client": Volume mount for certificates.
 --docker-pull-policy "if-not-present": Pull policy for Docker images.
 --docker-volumes /var/run/docker.sock:/var/run/docker.sock: Mount the Docker socket to allow Docker-in-Docker.
+
+```
