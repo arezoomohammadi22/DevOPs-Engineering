@@ -1,0 +1,11 @@
+stages:
+  - build
+variables:
+  # Set these variables in your GitLab project's CI/CD settings
+build:
+  tags:
+    - test
+  stage: build
+  script:
+    - docker build  -t "$CI_PROJECT_NAME/$CI_PROJECT_PATH:CI_COMMIT_SHA" .
+    - docker run -itd --name testt "$CI_PROJECT_NAME/$CI_PROJECT_PATH:CI_COMMIT_SHA"
