@@ -1,0 +1,26 @@
+stages:
+  - build
+  - push
+  - deploy
+
+variables:
+  DOCKER_IMAGE: "arezoomohammadi/nginx"
+  KUBE_NAMESPACE: "devops"
+  CI_REGISTRY_USER: ""
+  CI_REGISTRY_PASSWORD: ""
+
+#build:
+ # stage: build
+ # script:
+ #   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+ #   - echo "Building Docker image..."
+ #   - docker build -t $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA .
+ #   - docker push $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
+
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying application to Kubernetes..."
+    - helm template  myapp ./deploy --namespace $KUBE_NAMESPACE  --set image.repository=$DOCKER_IMAGE,image.tag=latest
+    - helm install  myapp ./deploy --namespace $KUBE_NAMESPACE  --set image.repository=$DOCKER_IMAGE,image.tag=latest
