@@ -1,0 +1,39 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  FRONTEND_IMAGE: my-frontend-image
+  BACKEND_IMAGE: my-backend-image
+
+before_script:
+  - echo "Starting CI/CD Pipeline"
+
+build-frontend:
+  stage: build
+  script:
+    - docker login -u "arezoomohammadi" -p "Arezoo12345"
+    - docker build -t arezoomohammadi/$FRONTEND_IMAGE .
+  
+    - docker tag arezoomohammadi/$FRONTEND_IMAGE:$CI_COMMIT_SHA
+    - docker push arezoomohammadi/$FRONTEND_IMAGE
+  tags:
+    - test
+
+
+test:
+  stage: test
+  script:
+    - echo "Testing stage - add your tests here"
+  tags:
+    - test
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying to Kubernetes"
+    - helm install  my-fullstack-app ./deploy --set image=arezoomohammadi/$FRONTEND_IMAGE --set tag=$CI_COMMIT_SHA 
+  tags:
+    - test
+
