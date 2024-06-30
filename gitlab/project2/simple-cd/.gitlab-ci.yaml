@@ -1,0 +1,23 @@
+# Define the stages for the pipeline
+stages:
+  - deploy
+
+# Define the job to pull the Nginx Docker image and create a container
+deploy:
+  stage: deploy
+  # Only run this job when the branch name is "main"
+  only:
+    - main
+  tags:
+    - test  # Use a shell runner (you may have a GitLab runner configured with this tag)
+
+  # Define variables
+  variables:
+    NGINX_CONTAINER_NAME: nginx
+
+  # Define the script to execute for the job
+  script:
+    # Pull the latest Nginx Docker image from the specified registry
+    - docker pull docker.arvancloud.ir/nginx:latest
+    # Run a Docker container named "nginx" using the pulled image
+    - docker run -d --name $NGINX_CONTAINER_NAME -p 800:80 docker.arvancloud.ir/nginx:latest
