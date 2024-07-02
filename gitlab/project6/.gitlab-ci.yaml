@@ -6,6 +6,7 @@ stages:
 variables:
   FRONTEND_IMAGE: my-frontend-image
   BACKEND_IMAGE: my-backend-image
+  CI_REGISTRY: registry.sananetco.com
 
 before_script:
   - echo "Starting CI/CD Pipeline"
@@ -13,14 +14,11 @@ before_script:
 build-frontend:
   stage: build
   script:
-    - docker login -u "arezoomohammadi" -p "Arezoo12345"
-    - docker build -t arezoomohammadi/$FRONTEND_IMAGE .
-  
-    - docker tag arezoomohammadi/$FRONTEND_IMAGE:$CI_COMMIT_SHA
-    - docker push arezoomohammadi/$FRONTEND_IMAGE
+    - docker login $CI_REGISTRY -u admin -p 123@qwe
+    - docker build -t $CI_REGISTRY/$FRONTEND_IMAGE:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY/$FRONTEND_IMAGE:$CI_COMMIT_SHA
   tags:
     - test
-
 
 test:
   stage: test
@@ -31,9 +29,14 @@ test:
 
 deploy:
   stage: deploy
+  image: dtzar/helm-kubectl:latest
   script:
     - echo "Deploying to Kubernetes"
-    - helm install  my-fullstack-app ./deploy --set image=arezoomohammadi/$FRONTEND_IMAGE --set tag=$CI_COMMIT_SHA 
+    - mkdir -p ~/.kube
+    - echo "$KUBE_CONFIG" > ~/.kube/config
+    - whoami && pwd
+    - helm install my-fullstack-app ./deploy --set image.repository=$CI_REGISTRY/$FRONTEND_IMAGE --set image.tag=$CI_COMMIT_SHA --kubeconfig ~/.kube/config
   tags:
     - test
-
+  only:
+    - main
