@@ -24,3 +24,11 @@ frontend/
     ├── index.css
     └── index.js
 ```
+```bash
+kubectl create secret docker-registry my-registry-secret \
+        --docker-server=registry.sananetco.com \
+        --docker-username=admin \
+        --docker-password=123@qwe \
+        --docker-email=admin@sananetco.com \
+
+```
