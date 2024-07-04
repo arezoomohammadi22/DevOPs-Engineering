@@ -5,7 +5,7 @@ from flask_mail import Mail, Message
 import requests
 app = Flask(__name__)
 
-app.config['MAIL_SERVER'] = 'Mail.yourdomain'
+app.config['MAIL_SERVER'] = 'Mail.sananetco.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USERNAME'] = 'notification@syoudomain'
 app.config['MAIL_PASSWORD'] = 'password'
