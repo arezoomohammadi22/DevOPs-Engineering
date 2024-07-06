@@ -4,23 +4,31 @@ stages:
   - deploy
 
 variables:
-  DOCKER_IMAGE: "arezoomohammadi/nginx"
-  KUBE_NAMESPACE: "devops"
-  CI_REGISTRY_USER: ""
+  CI_REGISTRY: registry.sananetco.com
+  CI_REGISTRY_USER: "admin"
   CI_REGISTRY_PASSWORD: ""
 
-#build:
- # stage: build
- # script:
- #   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
- #   - echo "Building Docker image..."
- #   - docker build -t $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA .
- #   - docker push $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
+build:
+  stage: build
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - echo "Building Docker image..."
+    - docker build -t $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHORT_SHA .
+    - docker push $CI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_SHORT_SHA
+    
+  tags:
+    - docker
 
 
 deploy:
   stage: deploy
+  image: dtzar/helm-kubectl:latest
   script:
+
     - echo "Deploying application to Kubernetes..."
-    - helm template  myapp ./deploy --namespace $KUBE_NAMESPACE  --set image.repository=$DOCKER_IMAGE,image.tag=latest
-    - helm install  myapp ./deploy --namespace $KUBE_NAMESPACE  --set image.repository=$DOCKER_IMAGE,image.tag=latest
+    - mkdir -p ~/.kube
+    - echo "$KUBE_CONFIG" > ~/.kube/config
+    - helm template  myapp ./deploy --namespace default  --set image.repository=$CI_REGISTRY/$CI_PROJECT_PATH,image.tag=$CI_COMMIT_SHORT_SHA
+    - helm install  myapp ./deploy --namespace default  --set image.repository=$CI_REGISTRY/$CI_PROJECT_PATH,image.tag=$CI_COMMIT_SHORT_SHA
+  tags:
+    - docker
