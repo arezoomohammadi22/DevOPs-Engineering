@@ -1,0 +1,6 @@
+---
+- name: Ensure the directory is created
+  file:
+    path: "{{ directory_path }}"
+    state: directory
+    mode: '0755'
