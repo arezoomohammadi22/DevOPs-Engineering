@@ -1,0 +1,49 @@
+---
+- name: Install and configure NGINX on multiple servers
+  hosts: webservers
+  become: yes
+  vars:
+    nginx_server_block:
+      - server_name: "example.com"
+        root: "/var/www/html"
+
+  tasks:
+    - name: Ensure NGINX is installed
+      apt:
+        name: nginx
+        state: present
+      notify: restart nginx
+
+    - name: Create the NGINX server block configuration
+      template:
+        src: server_block.j2
+        dest: "/etc/nginx/conf.d/{{ item.server_name }}.conf"
+      with_items: "{{ nginx_server_block }}"
+      notify: restart nginx
+
+    - name: Ensure the web root directory exists
+      file:
+        path: "{{ item.root }}"
+        state: directory
+      with_items: "{{ nginx_server_block }}"
+
+    - name: Create a custom index.html file
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Welcome to {{ item.server_name }}!</title>
+          </head>
+          <body>
+              <h1>Success! The {{ item.server_name }} server block is working!</h1>
+          </body>
+          </html>
+        dest: "{{ item.root }}/index.html"
+      with_items: "{{ nginx_server_block }}"
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
