@@ -1,0 +1,6 @@
+---
+- name: Create a directory on remote servers
+  hosts: webservers
+  become: yes
+  roles:
+    - create_directory
