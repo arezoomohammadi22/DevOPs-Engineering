@@ -1,7 +1,0 @@
----
-- name: Create Docker container
-  hosts: appserver
-  become: yes
-
-  roles:
-    - create_container
