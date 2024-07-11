@@ -70,3 +70,6 @@ ansible-docker-playbook/
 
 
 ```
+```bash
+ansible-playbook playbooks/install_docker.yml
+```
