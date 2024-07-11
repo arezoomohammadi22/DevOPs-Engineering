@@ -1,0 +1,25 @@
+---
+- name: Ensure NGINX is installed
+  apt:
+    name: nginx
+    state: present
+  notify: restart nginx
+
+- name: Create the NGINX server block configuration
+  template:
+    src: server_block.j2
+    dest: "/etc/nginx/conf.d/{{ item.server_name }}.conf"
+  with_items: "{{ nginx_server_block }}"
+  notify: restart nginx
+
+- name: Ensure the web root directory exists
+  file:
+    path: "{{ item.root }}"
+    state: directory
+  with_items: "{{ nginx_server_block }}"
+
+- name: Create a custom index.html file
+  copy:
+    src: index.html
+    dest: "{{ item.root }}/index.html"
+  with_items: "{{ nginx_server_block }}"
