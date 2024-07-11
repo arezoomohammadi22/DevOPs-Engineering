@@ -1,0 +1,6 @@
+---
+- name: Install and configure NGINX on multiple servers
+  hosts: webservers
+  become: yes
+  roles:
+    - nginx
