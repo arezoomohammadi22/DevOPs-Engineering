@@ -1,0 +1,4 @@
+---
+nginx_server_block:
+  - server_name: "example.com"
+    root: "/var/www/html"
