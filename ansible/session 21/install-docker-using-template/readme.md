@@ -51,3 +51,22 @@ echo "---
     enabled: yes" > ansible-docker-playbook/roles/install_docker/tasks/main.yml
 
 ```
+
+```bash
+ansible-docker-playbook/
+├── ansible.cfg
+├── inventory
+│   └── hosts
+├── playbooks
+│   └── install_docker.yml
+└── roles
+    └── install_docker
+        ├── tasks
+        │   └── main.yml
+        ├── files
+        ├── templates
+        ├── handlers
+        └── vars
+
+
+```
