@@ -1,0 +1,13 @@
+---
+- name: Pull Docker image
+  docker_image:
+    name: docker.arvancloud.ir/nginx:latest
+    source: pull
+
+- name: Create Docker container
+  docker_container:
+    name: my_nginx_container
+    image: docker.arvancloud.ir/nginx:latest
+    state: started
+    ports:
+      - "80:80"
