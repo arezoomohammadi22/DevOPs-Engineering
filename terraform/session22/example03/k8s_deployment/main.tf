@@ -33,7 +33,7 @@ resource "kubernetes_deployment" "nginx_deployment" {
           name  = "nginx"
           image = "nginx:1.21.1"
 
-          ports {
+          port {
             container_port = 80
           }
         }
