@@ -16,7 +16,7 @@ resource "kubernetes_pod" "example_pod" {
     container {
       name  = "nginx"
       image = "nginx:1.21.1"
-      ports {
+      port {
         container_port = 80
       }
     }
