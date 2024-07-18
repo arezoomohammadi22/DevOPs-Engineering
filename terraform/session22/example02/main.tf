@@ -15,7 +15,7 @@ resource "kubernetes_pod" "example_pod" {
   spec {
     container {
       name  = "nginx"
-      image = "nginx:1.21.1"
+      image = "docker.arvancloud.ir/nginx:1.21.1"
       port {
         container_port = 80
       }
