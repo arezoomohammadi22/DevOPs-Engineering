@@ -1,17 +1,19 @@
-from kubernetes import client, config
-import subprocess
-import os
-import base64
+# import os
 import yaml
+import base64
+import subprocess
+from kubernetes import client, config
 
 
 # Load kubeconfig file
 config.load_kube_config()
 
+
 # Set context to specific cluster
 config.current_context = ''
 # Create Kubernetes API client
 v1 = client.CoreV1Api()
+
 
 # Prompt the user for input
 username = input("Enter username: ")
@@ -24,16 +26,18 @@ subprocess.run(f"openssl x509 -req -in {username}.csr -CA ca.crt -CAkey ca.key -
 subprocess.run(f"kubectl config set-credentials {username} --client-certificate={username}.crt --client-key={username}.key", shell=True)
 
 
-
 # Read the certificate and private key into memory
 with open(f"{username}.crt", "r") as f:
     cert_data = f.read()
+
 with open(f"{username}.key", "r") as f:
     key_data = f.read()
+
 
 # Encode certificate and private key as base64 strings
 cert_b64 = base64.b64encode(cert_data.encode('ascii')).decode('ascii')
 key_b64 = base64.b64encode(key_data.encode('ascii')).decode('ascii')
+
 
 # Create a new Kubernetes Secret with the user's certificate and private key
 v1.create_namespaced_secret(namespace, {
@@ -65,6 +69,7 @@ role = {
         }
     ]
 }
+
 rbac_api.create_namespaced_role(namespace, role)
 
 role_binding = {
@@ -86,6 +91,7 @@ role_binding = {
         "apiGroup": "rbac.authorization.k8s.io"
     }
 }
+
 rbac_api.create_namespaced_role_binding(namespace, role_binding)
 
 print(f"User {username} has been created and granted access to namespace {namespace}.")
@@ -126,10 +132,7 @@ kubeconfig = {
 }
 
 # Encode kubeconfig as YAML and save to file
-import yaml
-
 with open(f"config", "w") as f:
     f.write(yaml.dump(kubeconfig))
 
 print(f"Kubeconfig file for user {username} has been created.")
-
