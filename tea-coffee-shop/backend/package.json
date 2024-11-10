@@ -1,0 +1,12 @@
+{
+  "name": "tea-coffee-backend",
+  "version": "1.0.0",
+  "description": "Backend for Tea & Coffee Shop project",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
