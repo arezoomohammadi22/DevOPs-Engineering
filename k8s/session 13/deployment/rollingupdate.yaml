@@ -1,16 +1,16 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: apps/v1 
+kind: Deployment 
 metadata:
-  name: nginx01
+  name: nginx01 
   labels:
-    app: note-sample-app
+    app: note-sample-app 
 spec:
-  replicas: 4
   strategy:
-    type: RollingUpdate
+    type: RollingUpdate 
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 0
       maxUnavailable: 1
+  replicas: 6
   selector:
     matchLabels:
       app: note-sample-app
@@ -20,7 +20,26 @@ spec:
         app: note-sample-app
     spec:
       containers:
-      - name: nginx
-        image: nginx:latest
+      - name: web
+        image: nginx:1.21
         ports:
         - containerPort: 80
+        startupProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
