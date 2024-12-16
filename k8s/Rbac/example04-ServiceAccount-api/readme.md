@@ -5,7 +5,7 @@ This guide explains how to create a ServiceAccount in Kubernetes, generate a tok
 
 ---
 
-## Example-03: Step 1 - Create a ServiceAccount
+## Step 1 - Create a ServiceAccount
 
 Create a file named `serviceaccount.yaml` with the following content:
 
@@ -25,7 +25,7 @@ kubectl apply -f serviceaccount.yaml
 
 ---
 
-## Example-03: Step 2 - Create a Role and RoleBinding
+## Step 2 - Create a Role and RoleBinding
 
 Define a Role and RoleBinding to grant the necessary permissions to the ServiceAccount. For example:
 
@@ -68,7 +68,7 @@ kubectl apply -f rolebinding.yaml
 
 ---
 
-## Example-03: Step 3 - Generate a Token for the ServiceAccount
+## Step 3 - Generate a Token for the ServiceAccount
 
 Create a Secret to store the ServiceAccount token:
 
@@ -99,7 +99,7 @@ Copy the token for use in your applications.
 
 ---
 
-## Example-03: Step 4 - Use the Token in Your Application
+## Step 4 - Use the Token in Your Application
 
 You can use the ServiceAccount token to authenticate your applications with the Kubernetes API. For example, using Python:
 
