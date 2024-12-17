@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+  - ReadWriteMany
+  storageClassName: nfs-storage
+  nfs:
+    path: /srv/nfs/kubedata
+    server: <NFS_SERVER_IP> # Replace with your NFS server IP
