@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nfs-dynamic-pvc-pod
+spec:
+  containers:
+  - name: nginx
+    image: docker.arvancloud.ir/nginx:1.21
+    volumeMounts:
+    - mountPath: "/usr/share/nginx/html"
+      name: nfs-dynamic-storage
+  volumes:
+  - name: nfs-dynamic-storage
+    persistentVolumeClaim:
+      claimName: nfs-dynamic-pvc
