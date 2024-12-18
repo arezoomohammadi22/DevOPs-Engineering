@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mysql-init-job
+spec:
+  template:
+    metadata:
+      labels:
+        app: mysql-init
+    spec:
+      containers:
+      - name: mysql-init-container
+        image: mysql:5.7
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            until mysqladmin ping -h mysql --silent; do
+              echo 'waiting for mysql';
+              sleep 5;
+            done;
+            mysql -h mysql -uuser -ppassword dbname <<-EOSQL
+              CREATE TABLE IF NOT EXISTS test_table (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                data VARCHAR(255) NOT NULL
+              );
+            EOSQL
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: password
+      restartPolicy: OnFailure
+  backoffLimit: 4
