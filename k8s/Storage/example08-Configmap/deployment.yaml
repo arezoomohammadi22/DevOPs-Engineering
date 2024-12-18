@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: myimage:latest
+        args:
+        - "$(config1)"
+        - "$(config2)"
+        env:
+        - name: config1
+          valueFrom:
+            configMapKeyRef:
+              name: app-args
+              key: config1
+        - name: config2
+          valueFrom:
+            configMapKeyRef:
+              name: app-args
+              key: config2
