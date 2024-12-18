@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-app
+  template:
+    metadata:
+      labels:
+        app: log-app
+    spec:
+      containers:
+      - name: log-container
+        image: log-app:latest
+        volumeMounts:
+        - name: log-volume
+          mountPath: /etc/log-config.yml
+          subPath: log-config.yml
+      volumes:
+      - name: log-volume
+        configMap:
+          name: log-config
