@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: example-configmap
+data:
+  database: mongodb
+  database_uri: mongodb://localhost:27017
+  keys: |
+    image.public.key=771
+    rsa.public.key=42
