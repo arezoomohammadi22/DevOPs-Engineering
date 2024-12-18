@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-properties
+data:
+  application.properties: |
+    server.port=8080
+    database.url=jdbc:mysql://mysql:3306/mydb
+    logging.level=info
