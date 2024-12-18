@@ -17,7 +17,7 @@ spec:
         image: nginx:latest
         volumeMounts:
         - name: config-volume
-          mountPath: /etc/nginx/nginx.conf
+          mountPath: /etc/nginx/conf.d/nginx.conf
           subPath: nginx.conf
       volumes:
       - name: config-volume
