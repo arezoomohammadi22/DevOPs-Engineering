@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-app
+  template:
+    metadata:
+      labels:
+        app: spring-app
+    spec:
+      containers:
+      - name: spring-container
+        image: spring-app:latest
+        volumeMounts:
+        - name: properties-volume
+          mountPath: /config/application.properties
+          subPath: application.properties
+      volumes:
+      - name: properties-volume
+        configMap:
+          name: app-properties
