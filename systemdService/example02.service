@@ -1,0 +1,12 @@
+[Unit]
+Description=Print Time Every Second
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c 'while true; do echo $(date); sleep 1; done'
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mytime
+
+[Install]
+WantedBy=default.target
