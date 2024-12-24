@@ -1,0 +1,56 @@
+############################
+# Filebeat Inputs          #
+############################
+filebeat.inputs:
+  - type: container
+    id: my-filestream-id
+    enabled: true
+    paths:
+      - /var/log/containers/master-payment*.log
+    
+    # Processors
+    processors:
+      - drop_fields:
+          fields: ["host.ip", "host.mac", "ecs.version"]
+    
+    # Only include lines that contain 'err' or 'warn'
+    include_lines: ['err', 'warn']
+
+############################
+# Logging                  #
+############################
+logging.level: debug
+# logging.to_files: true
+# logging.files:
+#   path: /var/log/filebeat
+#   name: filebeat
+#   keepfiles: 7
+
+############################
+# Filebeat Modules         #
+############################
+filebeat.config.modules:
+  path: /etc/filebeat/modules.d/*.yml
+  reload.enabled: false
+
+############################
+# Index Template Settings  #
+############################
+setup.template.settings:
+  index.number_of_shards: 1
+
+############################
+# Output to Kafka          #
+############################
+output.kafka:
+  hosts: ['192.168.10.170:9092', '192.168.10.172:9092', '192.168.10.173:9092']
+  topic: "payment"
+  codec.json:
+    pretty: false
+
+# You could also specify other Kafka settings here, for example:
+# partition.round_robin:
+#   reachable_only: false
+# required_acks: 1
+# compression: gzip
+# max_message_bytes: 1000000
