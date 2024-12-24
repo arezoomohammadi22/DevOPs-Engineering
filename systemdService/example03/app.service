@@ -1,0 +1,12 @@
+[Unit]
+Description=My Flask API Service
+After=network.target
+
+[Service]
+User=your_username
+WorkingDirectory=/path/to/your/app
+ExecStart=/usr/bin/python /path/to/your/app/app.py
+Restart=always
+
+[Install]
+WantedBy=default.target
