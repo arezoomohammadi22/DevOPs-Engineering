@@ -1,0 +1,10 @@
+[Unit]
+Description=My Custom Systemd Service
+After=network.target
+
+[Service]
+ExecStart=/path/to/myservice.sh
+Restart=always
+
+[Install]
+WantedBy=default.target
