@@ -1,0 +1,13 @@
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name: static-web04 
+spec:
+  initContainers:
+  - name: init-create-dir
+    image: busybox
+    command: ["/bin/sh", "-c", "sleep 5 && echo 'creating dir'"] 
+  containers:
+  - name: app
+    image: alpine
+    command: ['sh', '-c', 'echo "app is running" && sleep infinity']
