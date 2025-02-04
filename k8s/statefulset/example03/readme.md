@@ -1,12 +1,20 @@
 ## Explanation
 mysql-0 is the master:
+
 Creates a replica_user
+
 Grants replication privileges
+
 mysql-1 and mysql-2 are replicas:
+
 Connect to mysql-0
+
 Start replication using CHANGE MASTER TO
-##Verify Replication
+
+## Verify Replication
+
 After deploying, check the MySQL replication status:
+
 
 On the master (mysql-0)
 
