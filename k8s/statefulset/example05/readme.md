@@ -19,10 +19,6 @@ The cluster consists of:
 ## Deployment
 
 ### **1. Clone the Repository**
-```bash
-git clone https://github.com/your-repo/mysql-group-replication-k8s.git
-cd mysql-group-replication-k8s
-```
 
 ### **2. Deploy MySQL Headless Service**
 ```bash
