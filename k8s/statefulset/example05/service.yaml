@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  ports:
+    - port: 3306
+    - port: 33061  # Group Replication communication
+  clusterIP: None  # Headless service
+  selector:
+    app: mysql
