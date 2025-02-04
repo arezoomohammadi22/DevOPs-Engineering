@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: startup-exec
+spec:
+  containers:
+  - name: my-app
+    image: my-app-image
+    command: ["sh", "-c", "sleep 30 && touch /tmp/healthy && nginx -g 'daemon off;'"]
+    startupProbe:
+      exec:
+        command:
+        - cat
+        - /tmp/healthy  # Check if the file exists
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      failureThreshold: 10  # Allow up to 10 * 5s (50s) before marking as failed
