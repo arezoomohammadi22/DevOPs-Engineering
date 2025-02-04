@@ -18,14 +18,18 @@ spec:
         ports:
         - containerPort: 80
         livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 80
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - /usr/src/app/health-check.sh
           initialDelaySeconds: 10
           periodSeconds: 10
         readinessProbe:
-          httpGet:
-            path: /ready
-            port: 80
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - /usr/src/app/ready-check.sh
           initialDelaySeconds: 5
           periodSeconds: 10
