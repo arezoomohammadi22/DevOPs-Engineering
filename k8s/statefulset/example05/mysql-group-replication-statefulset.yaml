@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  serviceName: "mysql"
+  replicas: 3  # Minimum 3 nodes for Group Replication
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mysql
+        image: mysql:8
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "rootpassword"
+        - name: MYSQL_GROUP_SEED
+          value: "mysql-0.mysql,mysql-1.mysql,mysql-2.mysql"
+        command:
+        - "/bin/bash"
+        - "-c"
+        - |
+          echo "Configuring MySQL Group Replication..."
+
+          # Start MySQL
+          mysqld --initialize-insecure
+          mysqld --user=mysql --skip-networking=0 --daemonize
+
+          # Wait for MySQL to start
+          until mysqladmin ping --silent; do sleep 1; done
+
+          # Configure Group Replication
+          mysql -uroot -prootpassword -e "SET GLOBAL group_replication_bootstrap_group=OFF;"
+          mysql -uroot -prootpassword -e "CHANGE MASTER TO MASTER_USER='root', MASTER_PASSWORD='rootpassword' FOR CHANNEL 'group_replication_recovery';"
+
+          if [[ "$(hostname)" == "mysql-0" ]]; then
+            echo "Bootstrap group on mysql-0..."
+            mysql -uroot -prootpassword -e "SET GLOBAL group_replication_bootstrap_group=ON;"
+            mysql -uroot -prootpassword -e "START GROUP_REPLICATION;"
+            mysql -uroot -prootpassword -e "SET GLOBAL group_replication_bootstrap_group=OFF;"
+          else
+            echo "Joining the group..."
+            mysql -uroot -prootpassword -e "START GROUP_REPLICATION;"
+          fi
+
+          tail -f /dev/null
+        ports:
+        - containerPort: 3306
+          name: mysql
+        - containerPort: 33061
+          name: grp-comm
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
