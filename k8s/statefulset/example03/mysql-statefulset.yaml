@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  serviceName: "mysql"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mysql
+        image: mysql:8
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "rootpassword"
+        - name: MYSQL_REPLICATION_USER
+          value: "replica_user"
+        - name: MYSQL_REPLICATION_PASSWORD
+          value: "replica_password"
+        command:
+        - "/bin/sh"
+        - "-c"
+        - |
+          if [[ "$(hostname)" == "mysql-0" ]]; then
+            echo "Configuring master..."
+            mysql -uroot -prootpassword -e "CREATE USER 'replica_user'@'%' IDENTIFIED BY 'replica_password';"
+            mysql -uroot -prootpassword -e "GRANT REPLICATION SLAVE ON *.* TO 'replica_user'@'%';"
+            mysql -uroot -prootpassword -e "FLUSH PRIVILEGES;"
+          else
+            echo "Configuring replica..."
+            mysql -uroot -prootpassword -e "CHANGE MASTER TO MASTER_HOST='mysql-0.mysql', MASTER_USER='replica_user', MASTER_PASSWORD='replica_password', MASTER_AUTO_POSITION=1;"
+            mysql -uroot -prootpassword -e "START SLAVE;"
+          fi
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
