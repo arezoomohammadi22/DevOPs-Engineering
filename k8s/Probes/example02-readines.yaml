@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: readiness-tcp
+spec:
+  containers:
+  - name: my-app
+    image: nginx
+    ports:
+    - containerPort: 80
+    readinessProbe:
+      tcpSocket:
+        port: 80  # Check if port 80 is accepting connections
+      initialDelaySeconds: 3  # Wait 3 seconds before first check
+      periodSeconds: 5        # Check every 5 seconds
+      failureThreshold: 2      # If it fails 2 times, remove pod from Service
