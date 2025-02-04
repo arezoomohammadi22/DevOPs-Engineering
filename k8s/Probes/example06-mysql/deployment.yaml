@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  replicas: 1  # Single MySQL instance for this example
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "rootpassword"
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+        
+        # STARTUP PROBE - Ensures MySQL has fully initialized before liveness is checked
+        startupProbe:
+          exec:
+            command:
+            - mysql
+            - -e
+            - "SELECT 1"
+            - -uroot
+            - -prootpassword
+          initialDelaySeconds: 5   # Start checking after 5s
+          periodSeconds: 10        # Check every 10s
+          failureThreshold: 30     # Allow up to 5 minutes (30 x 10s) for MySQL to start
+
+        # LIVENESS PROBE - Ensures MySQL is still running, otherwise restart the container
+        livenessProbe:
+          tcpSocket:
+            port: 3306  # Checks if MySQL is accepting connections on port 3306
+          initialDelaySeconds: 10   # Start checking after 10s
+          periodSeconds: 5          # Check every 5 seconds
+          failureThreshold: 3       # Restart after 3 failures
+
+        # READINESS PROBE - Ensures MySQL is ready before traffic is sent
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+            - -uroot
+            - -prootpassword
+          initialDelaySeconds: 10   # Start checking after 10s
+          periodSeconds: 5          # Check every 5 seconds
+          failureThreshold: 3       # If it fails 3 times, remove from Service
+
+      volumes:
+      - name: mysql-storage
+        emptyDir: {}  # In production, use PersistentVolumes
