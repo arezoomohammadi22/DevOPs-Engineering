@@ -1,0 +1,41 @@
+---
+- name: Install and Configure MariaDB on RedHat & Ubuntu
+  hosts: database_servers
+  become: yes
+  vars:
+    mysql_root_password: "StrongRootPass123"
+    database_name: "my_database"
+    database_user: "db_user"
+    database_password: "SecurePass456"
+
+  tasks:
+    - name: Install required MySQL Python dependencies
+      package:
+        name: "{{ 'python3-PyMySQL' if ansible_os_family == 'RedHat' else 'python3-pymysql' }}"
+        state: present
+
+    - name: Install MariaDB on RedHat-based systems
+      package:
+        name: mariadb-server
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Install MariaDB on Debian-based systems
+      package:
+        name: mariadb-server
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure MariaDB service is running and enabled on RedHat
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure MariaDB service is running and enabled on Debian
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+      when: ansible_os_family == "Debian"
