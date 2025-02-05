@@ -1,0 +1,15 @@
+---
+- name: Deploy Multiple Docker Containers
+  hosts: docker_servers
+  become: yes
+  tasks:
+    - name: Start multiple containers
+      docker_container:
+        name: "{{ item.name }}"
+        image: "{{ item.image }}"
+        state: started
+        ports:
+          - "{{ item.port }}"
+      loop:
+        - { name: "nginx1", image: "nginx", port: "8081:80" }
+        - { name: "nginx2", image: "nginx", port: "8082:80" }
