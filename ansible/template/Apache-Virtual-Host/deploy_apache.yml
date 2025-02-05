@@ -1,0 +1,25 @@
+---
+- name: Deploy Apache Virtual Host
+  hosts: web_servers
+  become: yes
+  vars:
+    server_name: "example.com"
+    document_root: "/var/www/html"
+
+  tasks:
+    - name: Deploy Virtual Host Configuration
+      template:
+        src: templates/vhost.conf.j2
+        dest: "/etc/apache2/sites-available/example.com.conf"
+      notify: Restart Apache
+
+    - name: Enable site (Debian-based systems)
+      command: a2ensite example.com.conf
+      when: ansible_os_family == "Debian"
+      notify: Restart Apache
+
+  handlers:
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
