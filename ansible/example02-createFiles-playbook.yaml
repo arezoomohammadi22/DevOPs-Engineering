@@ -1,0 +1,39 @@
+---
+- name: Create a directory and file on group1 hosts
+  hosts: group1
+  become: yes
+  tasks:
+    - name: Ensure /opt/demo1 directory exists
+      file:
+        path: /opt/demo1
+        state: directory
+        mode: '0755'
+
+    - name: Create a file inside /opt/demo1
+      copy:
+        content: "This is a sample file in /opt/demo1"
+        dest: /opt/demo1/sample1.txt
+        mode: '0644'
+
+- name: Create multiple directories on group2 hosts
+  hosts: group2
+  become: yes
+  tasks:
+    - name: Ensure multiple directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - /opt/demo2
+        - /opt/demo3
+
+- name: Create a file with specific content on group3 hosts
+  hosts: group3
+  become: yes
+  tasks:
+    - name: Create a file with content
+      copy:
+        content: "Hello, this is a file created by Ansible!"
+        dest: /opt/demo_group3.txt
+        mode: '0644'
