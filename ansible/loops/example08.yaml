@@ -1,0 +1,56 @@
+- name: Deploy multiple Nginx virtual hosts
+  hosts: web_servers
+  become: yes
+  tasks:
+    - name: Create virtual host configurations
+      copy:
+        content: |
+          server {
+              listen 80;
+              server_name {{ item.server_name }};
+              root {{ item.root }};
+              index index.html;
+          }
+        dest: "/etc/nginx/sites-available/{{ item.server_name }}"
+        mode: '0644'
+      loop:
+        - { server_name: "example1.com", root: "/var/www/example1" }
+        - { server_name: "example2.com", root: "/var/www/example2" }
+      notify: Restart Nginx
+
+    - name: Enable sites (Debian-based systems)
+      file:
+        src: "/etc/nginx/sites-available/{{ item.server_name }}"
+        dest: "/etc/nginx/sites-enabled/{{ item.server_name }}"
+        state: link
+      when: ansible_os_family == "Debian"
+      loop:
+        - { server_name: "example1.com" }
+        - { server_name: "example2.com" }
+      notify: Restart Nginx
+
+    - name: Create website directories
+      file:
+        path: "{{ item.root }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+      loop:
+        - { root: "/var/www/example1" }
+        - { root: "/var/www/example2" }
+
+    - name: Deploy test index.html files
+      copy:
+        content: "<h1>Welcome to {{ item.server_name }}</h1>"
+        dest: "{{ item.root }}/index.html"
+        mode: '0644'
+      loop:
+        - { server_name: "example1.com", root: "/var/www/example1" }
+        - { server_name: "example2.com", root: "/var/www/example2" }
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
