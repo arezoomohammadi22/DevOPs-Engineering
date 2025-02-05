@@ -1,0 +1,29 @@
+---
+- name: Build and Run Custom Docker Image
+  hosts: docker_servers
+  become: yes
+  tasks:
+    - name: Copy index.html to target server
+      copy:
+        src: templates/index.html
+        dest: /tmp/index.html
+
+    - name: Generate Dockerfile from Jinja2 template
+      template:
+        src: templates/Dockerfile.j2
+        dest: /tmp/Dockerfile
+
+    - name: Build custom Nginx image
+      docker_image:
+        name: custom_nginx
+        build:
+          path: /tmp/
+        source: build
+
+    - name: Run custom Nginx container
+      docker_container:
+        name: custom_nginx
+        image: custom_nginx
+        state: started
+        ports:
+          - "8080:80"
