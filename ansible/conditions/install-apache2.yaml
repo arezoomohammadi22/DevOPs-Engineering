@@ -1,0 +1,30 @@
+---
+- name: Install and Start Apache on RedHat & Ubuntu
+  hosts: web_servers
+  become: yes
+  tasks:
+    - name: Install Apache on RedHat-based systems
+      package:
+        name: httpd
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Install Apache on Debian-based systems
+      package:
+        name: apache2
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure Apache service is running and enabled on RedHat
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure Apache service is running and enabled on Debian
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+      when: ansible_os_family == "Debian"
