@@ -1,0 +1,12 @@
+- name: Install multiple packages
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Install necessary packages
+      package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - nginx
+        - git
+        - curl
