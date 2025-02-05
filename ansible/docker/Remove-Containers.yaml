@@ -1,0 +1,10 @@
+---
+- name: Stop and Remove All Docker Containers
+  hosts: docker_servers
+  become: yes
+  tasks:
+    - name: Stop all running containers
+      shell: docker ps -q | xargs -r docker stop
+
+    - name: Remove all stopped containers
+      shell: docker ps -aq | xargs -r docker rm
