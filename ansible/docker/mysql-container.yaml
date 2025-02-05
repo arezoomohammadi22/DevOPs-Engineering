@@ -1,0 +1,30 @@
+---
+- name: Deploy Docker Network and Containers
+  hosts: docker_servers
+  become: yes
+  tasks:
+    - name: Create a Docker network
+      docker_network:
+        name: my_custom_network
+
+    - name: Start MySQL container
+      docker_container:
+        name: mysql_db
+        image: mysql:5.7
+        state: started
+        restart_policy: always
+        networks:
+          - name: my_custom_network
+        env:
+          MYSQL_ROOT_PASSWORD: "StrongPass123"
+
+    - name: Start Nginx container in the same network
+      docker_container:
+        name: nginx_app
+        image: nginx:latest
+        state: started
+        restart_policy: always
+        networks:
+          - name: my_custom_network
+        ports:
+          - "8080:80"
