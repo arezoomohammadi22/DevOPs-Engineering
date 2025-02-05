@@ -1,0 +1,18 @@
+<VirtualHost *:80>
+    ServerName {{ server_name }}
+    DocumentRoot {{ document_root }}
+
+    <Directory {{ document_root }}>
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    {% if ansible_os_family == "Debian" %}
+    ErrorLog /var/log/apache2/{{ server_name }}_error.log
+    CustomLog /var/log/apache2/{{ server_name }}_access.log combined
+    {% else %}
+    ErrorLog /var/log/httpd/{{ server_name }}_error.log
+    CustomLog /var/log/httpd/{{ server_name }}_access.log combined
+    {% endif %}
+
+</VirtualHost>
