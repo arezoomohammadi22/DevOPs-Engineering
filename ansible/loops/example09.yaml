@@ -1,0 +1,13 @@
+- name: Configure firewall rules
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Allow necessary ports
+      ufw:
+        rule: allow
+        port: "{{ item.port }}"
+        proto: "{{ item.protocol }}"
+      loop:
+        - { port: "22", protocol: "tcp" }
+        - { port: "80", protocol: "tcp" }
+        - { port: "443", protocol: "tcp" }
