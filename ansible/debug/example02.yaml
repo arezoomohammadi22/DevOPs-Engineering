@@ -1,0 +1,8 @@
+- name: Debug Example - Print a Variable
+  hosts: localhost
+  vars:
+    my_variable: "Ansible is awesome!"
+  tasks:
+    - name: Show the value of my_variable
+      debug:
+        var: my_variable
