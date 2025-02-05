@@ -1,0 +1,6 @@
+- name: Debug Example - Simple Message
+  hosts: localhost
+  tasks:
+    - name: Print a message
+      debug:
+        msg: "Hello, this is a debug message!"
