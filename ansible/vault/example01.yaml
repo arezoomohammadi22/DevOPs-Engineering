@@ -1,0 +1,19 @@
+---
+- name: Securely Configure MySQL
+  hosts: database_servers
+  become: yes
+  vars_files:
+    - secret.yml  # Load encrypted vault file
+
+  tasks:
+    - name: Install MySQL
+      package:
+        name: mariadb-server
+        state: present
+
+    - name: Set MySQL Root Password
+      mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+        host_all: true
+        login_unix_socket: true
