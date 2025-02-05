@@ -1,0 +1,10 @@
+- name: Debug Example - Inside a Loop
+  hosts: localhost
+  tasks:
+    - name: Loop through items and debug each
+      debug:
+        msg: "Processing item: {{ item }}"
+      loop:
+        - apple
+        - banana
+        - cherry
