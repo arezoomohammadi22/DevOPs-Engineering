@@ -1,0 +1,22 @@
+- name: Manage multiple services dynamically
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Install and start services
+      package:
+        name: "{{ item.service }}"
+        state: present
+      loop:
+        - { service: "nginx" }
+        - { service: "mariadb-server" }
+        - { service: "php-fpm" }
+
+    - name: Ensure services are running
+      service:
+        name: "{{ item.service }}"
+        state: started
+        enabled: yes
+      loop:
+        - { service: "nginx" }
+        - { service: "mariadb" }
+        - { service: "php-fpm" }
