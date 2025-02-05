@@ -1,0 +1,15 @@
+- name: Create multiple users with specific groups and shells
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Add users with groups and shells
+      user:
+        name: "{{ item.username }}"
+        shell: "{{ item.shell }}"
+        groups: "{{ item.groups }}"
+        home: "/home/{{ item.username }}"
+        state: present
+      loop:
+        - { username: "alice", shell: "/bin/bash", groups: "sudo" }
+        - { username: "bob", shell: "/bin/zsh", groups: "developers" }
+        - { username: "charlie", shell: "/bin/sh", groups: "users" }
