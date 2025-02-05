@@ -1,0 +1,14 @@
+- name: Set multiple environment variables
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Add environment variables
+      lineinfile:
+        path: /etc/environment
+        line: "{{ item.key }}={{ item.value }}"
+        create: yes
+        state: present
+      loop:
+        - { key: "APP_ENV", value: "production" }
+        - { key: "DEBUG_MODE", value: "false" }
+        - { key: "API_KEY", value: "123456789" }
