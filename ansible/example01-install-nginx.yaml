@@ -1,0 +1,21 @@
+- name: نصب و راه‌اندازی Nginx
+  hosts: web_servers
+  become: true
+  tasks:
+    - name: نصب Nginx روی اوبونتو
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: نصب Nginx روی CentOS
+      ansible.builtin.yum:
+        name: nginx
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: اطمینان از اجرای Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
