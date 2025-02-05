@@ -1,0 +1,58 @@
+---
+- name: Install and Configure NGINX
+  hosts: web_servers
+  become: yes
+
+  tasks:
+    - name: Install NGINX on RedHat-based systems
+      package:
+        name: nginx
+        state: present
+      when: ansible_os_family == "RedHat"
+      notify: Restart NGINX
+
+    - name: Install NGINX on Debian-based systems
+      package:
+        name: nginx
+        state: present
+      when: ansible_os_family == "Debian"
+      notify: Restart NGINX
+
+    - name: Ensure NGINX service is running and enabled
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Deploy custom NGINX configuration
+      copy:
+        content: |
+          server {
+              listen 80;
+              server_name mysite.example.com;
+              root /var/www/html;
+              index index.html;
+          }
+        dest: /etc/nginx/sites-available/mysite
+        mode: '0644'
+      notify: Restart NGINX
+
+    - name: Enable NGINX site configuration (Debian-based systems)
+      file:
+        src: /etc/nginx/sites-available/mysite
+        dest: /etc/nginx/sites-enabled/mysite
+        state: link
+      when: ansible_os_family == "Debian"
+      notify: Restart NGINX
+
+    - name: Create a test HTML page
+      copy:
+        content: "<h1>Welcome to My NGINX Site</h1>"
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+  handlers:
+    - name: Restart NGINX
+      service:
+        name: nginx
+        state: restarted
