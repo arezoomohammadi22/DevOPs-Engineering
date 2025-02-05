@@ -1,0 +1,12 @@
+- name: Create multiple users with different shells
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Add users
+      user:
+        name: "{{ item.username }}"
+        shell: "{{ item.shell }}"
+        state: present
+      loop:
+        - { username: "alice", shell: "/bin/bash" }
+        - { username: "bob", shell: "/bin/zsh" }
