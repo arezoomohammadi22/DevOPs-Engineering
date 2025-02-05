@@ -1,0 +1,21 @@
+---
+- name: Configure MySQL
+  hosts: database_servers
+  become: yes
+  vars:
+    mysql_bind_address: "0.0.0.0"
+    mysql_port: 3306
+    max_connections: 200
+
+  tasks:
+    - name: Deploy MySQL Configuration
+      template:
+        src: templates/my.cnf.j2
+        dest: /etc/mysql/my.cnf
+      notify: Restart MySQL
+
+  handlers:
+    - name: Restart MySQL
+      service:
+        name: mysql
+        state: restarted
