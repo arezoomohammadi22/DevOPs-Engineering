@@ -1,0 +1,8 @@
+[mysqld]
+bind-address = {{ mysql_bind_address }}
+port = {{ mysql_port }}
+max_connections = {{ max_connections }}
+
+[mysqld_safe]
+log-error = {% if ansible_os_family == "Debian" %}/var/log/mysql/error.log{% else %}/var/log/mariadb/error.log{% endif %}
+pid-file = /var/run/mysqld/mysqld.pid
