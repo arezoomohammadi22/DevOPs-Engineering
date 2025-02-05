@@ -1,0 +1,13 @@
+- name: Create multiple directories
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Create directories
+      file:
+        path: "/opt/{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - dir1
+        - dir2
+        - dir3
