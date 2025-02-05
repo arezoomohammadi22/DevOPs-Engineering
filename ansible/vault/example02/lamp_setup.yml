@@ -1,0 +1,75 @@
+---
+- name: Deploy a Secure LAMP Stack
+  hosts: web_servers
+  become: yes
+  vars_files:
+    - secret.yml  # Load encrypted vault file
+
+  tasks:
+    - name: Install LAMP Packages
+      package:
+        name:
+          - apache2
+          - php
+          - php-mysql
+          - mariadb-server
+        state: present
+      notify: Restart Apache
+
+    - name: Ensure Apache Service is Running
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Ensure MySQL Service is Running
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    - name: Set MySQL Root Password
+      mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+        host_all: true
+        login_unix_socket: true
+
+    - name: Create MySQL Database
+      mysql_db:
+        name: my_database
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    - name: Create MySQL User with Permissions
+      mysql_user:
+        name: "{{ mysql_user }}"
+        password: "{{ mysql_user_password }}"
+        priv: "my_database.*:ALL"
+        host: "%"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    - name: Deploy Virtual Host Configuration
+      template:
+        src: templates/vhost.conf.j2
+        dest: "/etc/apache2/sites-available/mysite.conf"
+      notify: Restart Apache
+
+    - name: Enable Virtual Host
+      command: a2ensite mysite.conf
+      notify: Restart Apache
+
+    - name: Deploy PHP Application
+      copy:
+        src: templates/php_app/index.php
+        dest: /var/www/html/index.php
+        mode: '0644'
+
+  handlers:
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
