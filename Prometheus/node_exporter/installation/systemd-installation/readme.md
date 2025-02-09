@@ -135,50 +135,6 @@ curl http://localhost:9100/metrics
 
 ---
 
-## 🚀 Access Node Exporter via Nginx Reverse Proxy (Optional)
-
-If you want to access Node Exporter via **Nginx**, follow these steps:
-
-1. **Install Nginx (if not installed):**
-   ```bash
-   sudo apt update && sudo apt install -y nginx
-   ```
-
-2. **Edit the Nginx configuration file:**
-   ```bash
-   sudo nano /etc/nginx/sites-available/node_exporter
-   ```
-
-3. **Add the following configuration:**
-   ```nginx
-   server {
-       listen 80;
-       server_name monitoring.sananetco.com;
-
-       location /node_exporter/ {
-           proxy_pass http://localhost:9100/;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-           rewrite ^/node_exporter(/.*)$ $1 break;
-       }
-   }
-   ```
-
-4. **Enable the site and restart Nginx:**
-   ```bash
-   sudo ln -s /etc/nginx/sites-available/node_exporter /etc/nginx/sites-enabled/
-   sudo systemctl restart nginx
-   ```
-
-Now, you can access Node Exporter via:
-
-```
-http://monitoring.sananetco.com/node_exporter/
-```
-
----
-
 ## ✅ **Node Exporter is Successfully Installed!**
 
 Now **Prometheus is collecting system metrics from Node Exporter** 🎯. If you face any issues, check logs using:
