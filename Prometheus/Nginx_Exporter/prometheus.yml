@@ -1,0 +1,8 @@
+scrape_configs:
+  - job_name: 'nginx_example1'
+    static_configs:
+      - targets: ['localhost:9113']
+
+  - job_name: 'nginx_example2'
+    static_configs:
+      - targets: ['localhost:9114']
