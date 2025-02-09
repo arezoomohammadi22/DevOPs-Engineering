@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cadvisor
+  namespace: monitoring
+  labels:
+    app: cadvisor
+spec:
+  selector:
+    matchLabels:
+      name: cadvisor
+  template:
+    metadata:
+      labels:
+        name: cadvisor
+    spec:
+      containers:
+        - name: cadvisor
+          image: gcr.io/cadvisor/cadvisor:v0.47.2
+          ports:
+            - containerPort: 8080
+              hostPort: 8080
+              protocol: TCP
+          args:
+            - "--containerd=/run/containerd/containerd.sock"
+          securityContext:
+            privileged: true  # NEW: Needed to access `/dev/kmsg`
+          volumeMounts:
+            - name: containerd
+              mountPath: /run/containerd/containerd.sock
+              readOnly: true
+            - name: sys
+              mountPath: /sys
+              readOnly: true
+            - name: kubelet
+              mountPath: /var/lib/kubelet
+              readOnly: true
+            - name: rootfs
+              mountPath: /rootfs
+              readOnly: true
+            - name: disk
+              mountPath: /dev/disk
+              readOnly: true
+            - name: kmsg  # NEW: Add kmsg volume
+              mountPath: /dev/kmsg
+              readOnly: true
+      volumes:
+        - name: containerd
+          hostPath:
+            path: /run/containerd/containerd.sock
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: kubelet
+          hostPath:
+            path: /var/lib/kubelet
+        - name: rootfs
+          hostPath:
+            path: /
+        - name: disk
+          hostPath:
+            path: /dev/disk
+        - name: kmsg  # NEW: Add kmsg volume
+          hostPath:
+            path: /dev/kmsg
