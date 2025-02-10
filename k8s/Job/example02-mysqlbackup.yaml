@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mysql-backup-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: mysql-backup
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "yourpassword"
+        - name: MYSQL_DATABASE
+          value: "exampledb"
+        command: ["sh", "-c", "mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE > /backup/db-backup.sql"]
+        volumeMounts:
+        - name: backup-volume
+          mountPath: /backup
+      restartPolicy: Never
+      volumes:
+      - name: backup-volume
+        hostPath:
+          path: /data/backups
+  backoffLimit: 3
+###Key Features in This Job:
+###Database Backup Task:
+###The command runs mysqldump to back up the database.
+#The dump file is saved in /backup/db-backup.sql.
+#Environment Variables:
+#MYSQL_ROOT_PASSWORD: Defines the root password.
+#MYSQL_DATABASE: Specifies the database to back up.
+#Persistent Volume:
+#A hostPath volume mounts /data/backups on the host system to /backup inside the container, ensuring the dump file is saved locally.
+#Retry Policy:
+#backoffLimit: 3 ensures the Job will retry up to 3 times in case of failure.
