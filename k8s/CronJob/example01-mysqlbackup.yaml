@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mysql-daily-backup
+spec:
+  schedule: "0 0 * * *" # Run at midnight every day
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: mysql-backup
+            image: mysql:8.0
+            env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "yourpassword"
+            - name: MYSQL_DATABASE
+              value: "exampledb"
+            command: ["sh", "-c", "mysqldump -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE > /backup/db-backup-$(date +'%Y-%m-%d').sql"]
+            volumeMounts:
+            - name: backup-volume
+              mountPath: /backup
+          restartPolicy: Never
+          volumes:
+          - name: backup-volume
+            hostPath:
+              path: /data/backups
+#This CronJob runs a database backup every day at midnight.
+# Key Features of This CronJob:
+# Scheduled Timing:
+# The 'schedule: "0 0 * * *"' schedules the task to run daily at midnight.
+# You can adjust the schedule using cron syntax.
+
+# Dynamic File Naming:
+# The backup file is named using the current date: db-backup-YYYY-MM-DD.sql.
+
+# Environment Variables:
+# Variables like MYSQL_ROOT_PASSWORD and MYSQL_DATABASE make the CronJob reusable for different databases.
+
+# Persistent Volume:
+# Uses a hostPath volume to save backups locally.
