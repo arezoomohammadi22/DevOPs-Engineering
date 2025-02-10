@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: daily-system-report
+spec:
+  schedule: "30 2 * * *" # Run at 2:30 AM daily
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: system-reporter
+            image: busybox
+            command: ["sh", "-c", "echo 'System Report for $(date)' > /reports/system-report-$(date +'%Y-%m-%d').txt"]
+            volumeMounts:
+            - name: report-volume
+              mountPath: /reports
+          restartPolicy: Never
+          volumes:
+          - name: report-volume
+            hostPath:
+              path: /data/reports # Path to save reports
+#f you'd like to generate a daily system report and save it to a shared directory
+# Key Features:
+# Scheduled Report Generation:
+# - Runs daily at 2:30 AM.
+# - Saves the report in /data/reports with the filename format system-report-YYYY-MM-DD.txt.
+
+# Reusable Command:
+# - The echo command can be replaced with scripts for detailed system analysis (e.g., disk usage, CPU stats).
