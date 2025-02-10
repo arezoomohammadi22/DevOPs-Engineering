@@ -1,0 +1,31 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: python-cronjob
+spec:
+  schedule: "0 * * * *" # Runs hourly; adjust the schedule as needed
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: python-cronjob
+            image: python:3.9 # Use the Python version you prefer
+            command: ["python", "-c"]
+            args:
+              - |
+                import psycopg2
+                # Connect to PostgreSQL
+                conn = psycopg2.connect(
+                    dbname='your_database', user='your_username', password='your_password', host='your_postgres_host'
+                )
+                # Perform your task here (e.g., execute a query)
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM your_table;")
+                rows = cursor.fetchall()
+                for row in rows:
+                    print(row)
+                # Close the connection
+                cursor.close()
+                conn.close()
+          restartPolicy: OnFailure
