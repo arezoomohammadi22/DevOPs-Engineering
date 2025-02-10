@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: simple-perl-job
+spec:
+  completions: 3 # Run the job successfully 3 times
+  backoffLimit: 2 # Retry the job up to 2 times if it fails
+  template:
+    spec:
+      containers:
+      - name: perl-container
+        image: perl
+        command: ["perl", "-e", "print 'Hello from Perl\n';"]
+      restartPolicy: Never
