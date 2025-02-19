@@ -1,0 +1,65 @@
+groups:
+  - name: docker_alerts
+    rules:
+      - alert: HighContainerCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service!=""}[1m]) * 100 > 80
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} is using more than 80% CPU for over 1 minute."
+
+      - alert: HighContainerMemoryUsage
+        expr: (container_memory_usage_bytes{container_label_com_docker_compose_service!=""} / container_spec_memory_limit_bytes) * 100 > 75
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} is using more than 75% of its allocated memory."
+
+      - alert: ContainerRestarted
+        expr: increase(container_restart_count{container_label_com_docker_compose_service!=""}[10m]) > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container restarted multiple times {{ $labels.name }}"
+          description: "Container {{ $labels.name }} has restarted more than 5 times in the last 10 minutes."
+
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 20
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Disk usage has exceeded 80% on {{ $labels.instance }}."
+
+      - alert: HighNetworkTraffic
+        expr: rate(container_network_receive_bytes_total{container_label_com_docker_compose_service!=""}[1m]) > 100000000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High network traffic on container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} is receiving more than 100MB/s of network traffic."
+
+      - alert: DockerDaemonDown
+        expr: absent(up{job="cadvisor"} == 1)
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Docker daemon is down on {{ $labels.instance }}"
+          description: "The Docker daemon has been unavailable for the last 5 minutes."
+
+      - alert: StoppedContainer
+        expr: container_last_seen{container_label_com_docker_compose_service!=""} < time() - 300
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} is stopped"
+          description: "Container {{ $labels.name }} has been stopped for more than 5 minutes."
