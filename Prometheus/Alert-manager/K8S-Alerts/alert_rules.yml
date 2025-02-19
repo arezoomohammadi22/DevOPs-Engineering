@@ -1,0 +1,97 @@
+groups:
+  - name: kubernetes_alerts
+    rules:
+
+      # 🚀 Kube-State-Metrics Alerts
+      - alert: KubernetesNodeNotReady
+        expr: kube_node_status_condition{condition="Ready", status="true"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Kubernetes Node Not Ready ({{ $labels.node }})"
+          description: "Node {{ $labels.node }} is not ready for more than 2 minutes."
+
+      - alert: KubernetesPodCrashLoopBackOff
+        expr: kube_pod_container_status_restarts_total > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod in CrashLoopBackOff ({{ $labels.pod }})"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has restarted more than 5 times in the last 5 minutes."
+
+      - alert: KubernetesDeploymentReplicasMismatch
+        expr: kube_deployment_status_replicas_unavailable > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Deployment Replicas Mismatch ({{ $labels.deployment }})"
+          description: "Deployment {{ $labels.deployment }} in namespace {{ $labels.namespace }} has unavailable replicas."
+
+      # 🖥️ Node Exporter Alerts
+      - alert: HighNodeCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU Usage on Node ({{ $labels.instance }})"
+          description: "Node {{ $labels.instance }} has CPU usage over 80% for more than 2 minutes."
+
+      - alert: HighNodeMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Memory Usage on Node ({{ $labels.instance }})"
+          description: "Node {{ $labels.instance }} has memory usage over 80%."
+
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 20
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low Disk Space on Node ({{ $labels.instance }})"
+          description: "Node {{ $labels.instance }} has less than 20% disk space available."
+
+      # 📦 cAdvisor (Container Monitoring) Alerts
+      - alert: HighContainerCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service!=""}[1m]) * 100 > 80
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU Usage in Container ({{ $labels.name }})"
+          description: "Container {{ $labels.name }} is using more than 80% CPU for over 1 minute."
+
+      - alert: HighContainerMemoryUsage
+        expr: (container_memory_usage_bytes{container_label_com_docker_compose_service!=""} / container_spec_memory_limit_bytes) * 100 > 75
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Memory Usage in Container ({{ $labels.name }})"
+          description: "Container {{ $labels.name }} is using more than 75% of its allocated memory."
+
+      - alert: ContainerRestartingTooFrequently
+        expr: increase(container_restart_count{container_label_com_docker_compose_service!=""}[10m]) > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container Restarting Too Frequently ({{ $labels.name }})"
+          description: "Container {{ $labels.name }} has restarted more than 5 times in the last 10 minutes."
+
+      # 🔗 Network Alerts
+      - alert: HighNetworkTraffic
+        expr: rate(container_network_receive_bytes_total{container_label_com_docker_compose_service!=""}[1m]) > 100000000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Network Traffic in Container ({{ $labels.name }})"
+          description: "Container {{ $labels.name }} is receiving more than 100MB/s of network traffic."
