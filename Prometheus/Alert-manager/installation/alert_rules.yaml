@@ -1,0 +1,11 @@
+groups:
+  - name: example_alerts
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is down"
+          description: "Prometheus has stopped receiving metrics from {{ $labels.instance }}."
