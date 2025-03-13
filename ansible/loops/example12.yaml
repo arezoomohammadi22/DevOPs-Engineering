@@ -1,0 +1,13 @@
+- name: list files
+  hosts: app-servers
+  become: yes
+  tasks:
+    - name: list files in directory
+      find:
+        paths: "/etc"
+        patterns: "*.conf"
+      register: found_files
+    - name: display found files
+      debug:
+        msg: "{{ item.path }}"
+      loop: "{{ found_files.files  }}"
