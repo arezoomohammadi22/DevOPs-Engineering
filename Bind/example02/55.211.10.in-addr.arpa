@@ -1,0 +1,15 @@
+; Reverse zone file for 55.211.10.in-addr.arpa
+;
+$TTL 3600
+@ IN SOA ns1.sananetco.com. admin.sananetco.com (
+	2023062101 ; Serial
+	3600 ; Refresh
+	1800 ; Retry
+	604800 ; Expire
+	86400 ; Minimum TTL
+)
+@ IN NS ns1.sananetco.com.
+
+; PTR Record
+53  IN PTR ns1.sananetco.com.
+66  IN PTR mail.sananetco.com.
