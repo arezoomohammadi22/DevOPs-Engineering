@@ -1,0 +1,4 @@
+zone "sananetco.com" {
+type master;
+file "/etc/bind/zones/sananetco.com.deb";
+};
