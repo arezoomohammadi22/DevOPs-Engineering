@@ -1,0 +1,16 @@
+$TTL 3600
+@ IN SOA ns1.sananetco.com. admin.sananetco.com. (
+	2025052401 ; 
+	3600 ;
+	1800 ;
+	604800 ;  
+	86400;
+	 )
+
+@ IN NS ns1.sananetco.com. 
+@ IN A 10.211.55.52
+www IN A 10.211.55.52 
+mail IN A 10.211.55.66 
+ns1 IN A 10.211.55.53
+sananetco.com. IN MX 10  mail.sananetco.com.
+webmail IN CNAME mail
