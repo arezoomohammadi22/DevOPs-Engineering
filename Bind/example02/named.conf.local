@@ -1,0 +1,4 @@
+zone "55.211.10.in-addr.arpa" {
+type master;
+file "/etc/bind/reverse/55.211.10.in-addr.arpa";
+};
