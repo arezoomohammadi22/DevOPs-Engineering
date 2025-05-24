@@ -1,0 +1,19 @@
+acl "trusted" {
+	10.211.55.0/24; 
+	127.0.0.1;  
+};
+
+options {
+	directory "/var/cache/bind";
+	recursion yes; # enables recursive queries
+	allow-recursion { trusted; };
+	allow-query { trusted; };
+	listen-on{127.0.0.1;10.211.55.53;}; #ns1privateIPaddress-listenonprivatenetworkonly
+	allow-transfer { none; };
+	forwarders { 
+	8.8.8.8; 
+	8.8.4.4; 
+	};
+
+dnssec-validation no;
+listen-on-v6 { any; }; };
