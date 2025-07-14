@@ -8,3 +8,8 @@ spec:
   ports:
   - port: 3306
     targetPort: 3306
+
+
+
+####mysql -h mysql-access.default.svc.cluster.local -u root -p
+####mysql -h mysql-access.default.svc.cluster.local -u root -p
