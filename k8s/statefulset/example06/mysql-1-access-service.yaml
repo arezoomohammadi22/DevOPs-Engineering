@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-access
+spec:
+  selector:
+    statefulset.kubernetes.io/pod-name: mysql-1
+  ports:
+  - port: 3306
+    targetPort: 3306
