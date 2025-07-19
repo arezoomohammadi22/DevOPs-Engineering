@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: / # Important for path handling
+spec:
+  ingressClassName: nginx # Match your ingress controller
+  rules:
+    - host: your-domain.com
+      http:
+        paths:
+          - path: /app1
+            pathType: Prefix
+            backend:
+              service:
+                name: app1-service
+                port:
+                  number: 80
+          - path: /app2
+            pathType: Prefix
+            backend:
+              service:
+                name: app2-service
+                port:
+                  number: 80
