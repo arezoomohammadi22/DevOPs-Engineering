@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+        - name: app2
+          image: hashicorp/http-echo
+          args:
+            - "-text=Hello from App 2"
+          ports:
+            - containerPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app2-service
+spec:
+  selector:
+    app: app2
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5678
