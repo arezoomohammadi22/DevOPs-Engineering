@@ -26,8 +26,7 @@ This project demonstrates a real-world, production-style Kubernetes setup using:
 Since local Node.js was outdated, the frontend was created using Docker:
 
 ```bash
-docker run -it --rm -v ${PWD}:/app -w /app node:18-alpine \
-  sh -c "npm create vite@latest frontend -- --template react && cd frontend && npm install && npm run build"
+docker run -it --rm -v ${PWD}:/app -w /app node:18-alpine sh -c "npm create vite@latest frontend -- --template react"
 ```
 
 This command creates the frontend app, installs dependencies, and builds the project inside the container.
