@@ -1,15 +1,17 @@
+# nfs-pod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: hostpath-pvc-pod
+  name: nfs-test-pod
 spec:
   containers:
-  - name: nginx
-    image: nginx
+  - name: app
+    image: busybox
+    command: ["/bin/sh", "-c", "sleep 3600"]
     volumeMounts:
-    - mountPath: "/usr/share/nginx/html"
-      name: hostpath-storage
+    - name: nfs-volume
+      mountPath: /mnt/data
   volumes:
-  - name: hostpath-storage
+  - name: nfs-volume
     persistentVolumeClaim:
-      claimName: hostpath-pvc
+      claimName: nfs-pvc
