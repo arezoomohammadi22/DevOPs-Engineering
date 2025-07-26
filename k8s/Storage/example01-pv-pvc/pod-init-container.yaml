@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-with-pvc
+spec:
+  volumes:
+    - name: html-volume
+      persistentVolumeClaim:
+        claimName: nfs-pvc
+  initContainers:
+    - name: init-copy-html
+      image: nginx
+      command: ["/bin/sh", "-c"]
+      args:
+        - cp -r /usr/share/nginx/html/* /mnt/html/;
+      volumeMounts:
+        - name: html-volume
+          mountPath: /mnt/html
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
