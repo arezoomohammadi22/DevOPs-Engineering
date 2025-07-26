@@ -1,12 +1,14 @@
+# nfs-pv.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: hostpath-pv
+  name: nfs-pv
 spec:
   capacity:
     storage: 5Gi
   accessModes:
-  - ReadWriteOnce
-  hostPath:
-    path: /mnt/data
-  storageClassName: manual
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 10.211.55.57
+    path: /data
