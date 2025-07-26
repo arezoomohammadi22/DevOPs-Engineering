@@ -1,104 +1,95 @@
+# Kubernetes NFS Shared Volume Setup
 
-# HostPath Kubernetes Setup
-
-This guide demonstrates how to set up a HostPath PersistentVolume (PV), PersistentVolumeClaim (PVC), and a sample Pod in Kubernetes.
+This guide demonstrates how to mount a shared NFS volume into a Kubernetes Pod using a static PersistentVolume (PV) and PersistentVolumeClaim (PVC).
 
 ---
 
-## Step 1: Create a PersistentVolume (PV)
-Create a file named `hostpath-pv.yaml`:
+## 📁 Files Overview
 
-```yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: hostpath-pv
-spec:
-  capacity:
-    storage: 5Gi
-  accessModes:
-  - ReadWriteOnce
-  hostPath:
-    path: /mnt/data
-  storageClassName: manual
-```
+- `nfs-pv.yaml`: Defines the static PersistentVolume backed by an NFS server.
+- `nfs-pvc.yaml`: Declares the PersistentVolumeClaim that binds to the above PV.
+- `nfs-pod.yaml`: A simple Pod that mounts the PVC at `/mnt/data`.
 
-Apply:
+---
+
+## 1️⃣ Prerequisites
+
+- A running NFS server at IP `10.211.55.57`.
+- The NFS export path `/data` must be:
+  - Exported properly in `/etc/exports`
+  - Accessible from all Kubernetes nodes
+  - With permissions for the clients
+
+Example on the NFS server:
 ```bash
-kubectl apply -f hostpath-pv.yaml
+sudo exportfs -v
+# Expected output includes:
+/data  *(rw,sync,no_root_squash)
 ```
 
 ---
 
-## Step 2: Create a PersistentVolumeClaim (PVC)
-Create a file named `hostpath-pvc.yaml`:
+## 2️⃣ Apply the Manifests
 
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: hostpath-pvc
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  storageClassName: manual
-```
-
-Apply:
 ```bash
-kubectl apply -f hostpath-pvc.yaml
+# Create the PersistentVolume
+kubectl apply -f nfs-pv.yaml
+
+# Create the PersistentVolumeClaim
+kubectl apply -f nfs-pvc.yaml
+
+# Create the test Pod
+kubectl apply -f nfs-pod.yaml
 ```
 
 ---
 
-## Step 3: Create a Pod Using PVC
-Create a file named `pod-using-hostpath-pvc.yaml`:
+## 3️⃣ Verify
 
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: hostpath-pvc-pod
-spec:
-  containers:
-  - name: nginx
-    image: nginx
-    volumeMounts:
-    - mountPath: "/usr/share/nginx/html"
-      name: hostpath-storage
-  volumes:
-  - name: hostpath-storage
-    persistentVolumeClaim:
-      claimName: hostpath-pvc
-```
-
-Apply:
 ```bash
-kubectl apply -f pod-using-hostpath-pvc.yaml
+# Check that the PV is bound
+kubectl get pv
+
+# Check that the PVC is bound
+kubectl get pvc
+
+# Check that the pod is running
+kubectl get pods
+
+# Exec into the Pod and test write access
+kubectl exec -it nfs-test-pod -- sh
+
+# Inside the container:
+echo "hello from NFS" > /mnt/data/hello.txt
+cat /mnt/data/hello.txt
 ```
 
 ---
 
-## Verification
-1. **Check PVC Status**:
-   ```bash
-   kubectl get pvc
-   ```
+## 📌 Notes
 
-2. **Check Pod Status**:
-   ```bash
-   kubectl get pods
-   ```
-
-3. **Test Storage by Writing and Reading Data**:
-   ```bash
-   kubectl exec -it hostpath-pvc-pod -- sh -c "echo 'Hello HostPath!' > /usr/share/nginx/html/index.html"
-   kubectl exec -it hostpath-pvc-pod -- cat /usr/share/nginx/html/index.html
-   ```
+- `accessModes: ReadWriteMany` allows multiple pods or nodes to mount this NFS volume simultaneously.
+- The `persistentVolumeReclaimPolicy: Retain` means the volume data will persist even after the PVC is deleted.
+- You can mount the same PVC into multiple pods **at the same time**.
 
 ---
 
-This setup demonstrates a functional HostPath storage setup in Kubernetes.
+## 🔁 Reuse the PV with Multiple PVCs
+
+By default, one PV binds to one PVC.  
+To have **two PVCs** access the **same NFS path**, you can:
+
+1. Duplicate the PV with a different name (e.g., `nfs-pv-2`) but the same NFS `path`.
+2. Create a second PVC (e.g., `nfs-pvc-2`) that binds to it via `volumeName`.
+
+Be cautious of write conflicts if the apps are not designed for shared storage.
+
+---
+
+## 🧼 Cleanup
+
+```bash
+kubectl delete pod nfs-test-pod
+kubectl delete pvc nfs-pvc
+kubectl delete pv nfs-pv
+```
