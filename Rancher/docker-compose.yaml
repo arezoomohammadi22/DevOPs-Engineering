@@ -1,0 +1,16 @@
+services:
+  rancher:
+    image: rancher/rancher:latest
+    container_name: rancher
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    privileged: true
+    command: --no-cacerts
+    volumes:
+      - rancher-data:/var/lib/rancher
+      - /root/fullchain.pem:/etc/rancher/ssl/cert.pem:ro
+      - /root/privkey.pem:/etc/rancher/ssl/key.pem:ro
+
+volumes:
+  rancher-data:
