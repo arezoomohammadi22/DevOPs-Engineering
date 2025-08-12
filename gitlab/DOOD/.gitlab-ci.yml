@@ -1,0 +1,13 @@
+build-job:
+  image: docker:24                         # یا docker.arvancloud.ir/docker:24
+  stage: build
+  tags: [ "docker-dood" ]
+  variables:
+    DOCKER_BUILDKIT: "1"
+  script:
+    - docker info                          # با dockerd هاست صحبت می‌کند
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+  only:
+    - main
