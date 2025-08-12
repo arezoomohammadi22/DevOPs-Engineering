@@ -1,0 +1,9 @@
+# docker-compose.yml
+services:
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner-dind
+    restart: unless-stopped
+    volumes:
+      - ./config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock   # لازم برای خود Runner
