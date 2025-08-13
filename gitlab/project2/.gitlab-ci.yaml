@@ -1,9 +1,28 @@
-build-and-push:
+stages:
+  - build
+  - deploy
+
+variables:
+  IMAGE_REGISTRY: registry.sananetco.com
+build-stage:
+  before_script:
+    - echo $IMAGE_REGISTRY_PASSWORD |  docker login -u $IMAGE_REGISTRY_USER --password-stdin  $IMAGE_REGISTRY
   stage: build
   script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
-    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
-    # Optional: Push "latest" tag
-    - docker tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" "$CI_REGISTRY_IMAGE:latest"
-    - docker push "$CI_REGISTRY_IMAGE:latest"
+    - docker build -t $IMAGE_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA . 
+    - docker push  $IMAGE_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA
+  tags:
+    - docker-dood-runner
+  only:
+    - main 
+
+deplpy-stage:
+  stage: deploy 
+  image: docker.arvancloud.ir/dtzar/helm-kubectl:latest
+  script:
+    - echo "$KUBECONFIG_CONTENT" > kubeconfig
+    -  kubectl set image deployment/flask-deployment api=$IMAGE_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:$CI_COMMIT_SHORT_SHA -n  $CI_PROJECT_NAMESPACE --kubeconfig ./kubeconfig
+  only:
+    - main
+  tags:
+    - docker-dood-runner
