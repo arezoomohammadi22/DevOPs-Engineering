@@ -2,7 +2,7 @@ deploy-helm:
   image: docker.arvancloud.ir/dtzar/helm-kubectl:latest
   stage: deploy
   variables:
-    AGENT_KUBECONTEXT: "behsa/example01:k8s-connection"
+    AGENT_KUBECONTEXT: "devops/example01:k8s-connection"
     K8S_NAMESPACE: "devops"
   before_script:
     - kubectl config use-context "$AGENT_KUBECONTEXT"
@@ -13,7 +13,7 @@ deploy-helm:
   environment:
     name: dev
     kubernetes:
-      agent: "behsa/example01:k8s-connection"
+      agent: "devops/example01:k8s-connection"
       namespace: "devops"
   tags:
     - docker-installation-docker
