@@ -1,0 +1,5 @@
+ci_access:
+  projects:
+    - id: "devops/example01"   # or another project that will deploy
+      access_as:
+        ci_job: {}
