@@ -1,0 +1,13 @@
+ci_access:
+  groups:        # همه پروژه‌های گروه devops اجازه دارن روی dev دیپلوی کنن
+    - id: "devops"
+      access_as:
+        ci_job: {}
+
+  projects:      # فقط پروژه‌های اصلی روی staging و prod
+    - id: "devops/web-app"
+      access_as:
+        ci_job: {}
+    - id: "devops/api-service"
+      access_as:
+        ci_job: {}
