@@ -1,0 +1,17 @@
+stages:
+  - deploy
+
+deploy:
+  image: docker.arvancloud.ir/dtzar/helm-kubectl:latest
+  stage: deploy
+  tags:
+    - docker-installation-docker
+  script:
+    # Select your agent's kubecontext
+    - kubectl config use-context devops/example01:k8s-connection
+    # Apply all Kubernetes manifests in k8s/ folder
+    - kubectl apply -f deployment.yaml
+  environment:
+    name: production
+    kubernetes:
+      agent: devops/example01:k8s-connection
