@@ -1,0 +1,9 @@
+
+---
+- name: Jinja structures — practical Ansible examples
+  hosts: all
+  become: false
+  gather_facts: true
+
+  roles:
+    - jinja_demo

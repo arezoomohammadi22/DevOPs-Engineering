@@ -1,0 +1,42 @@
+
+---
+- name: Ensure output directory exists
+  ansible.builtin.file:
+    path: /tmp/jinja_demo
+    state: directory
+    mode: "0755"
+
+- name: Render variables example
+  ansible.builtin.template:
+    src: 01_variables.j2
+    dest: /tmp/jinja_demo/01_variables.txt
+
+- name: Render conditionals example
+  ansible.builtin.template:
+    src: 02_conditionals.j2
+    dest: /tmp/jinja_demo/02_conditionals.txt
+
+- name: Render loops example
+  ansible.builtin.template:
+    src: 03_loops.j2
+    dest: /tmp/jinja_demo/03_loops.txt
+
+- name: Render filters example
+  ansible.builtin.template:
+    src: 04_filters.j2
+    dest: /tmp/jinja_demo/04_filters.txt
+
+- name: Render comments example
+  ansible.builtin.template:
+    src: 05_comments.j2
+    dest: /tmp/jinja_demo/05_comments.txt
+
+- name: Render macros example
+  ansible.builtin.template:
+    src: 06_macros_main.j2
+    dest: /tmp/jinja_demo/06_macros.txt
+
+- name: Render include example
+  ansible.builtin.template:
+    src: 07_include_base.j2
+    dest: /tmp/jinja_demo/07_include.txt

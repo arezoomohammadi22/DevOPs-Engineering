@@ -1,0 +1,25 @@
+
+---
+app_mode: "production"
+site_name: "myapp.example.com"
+
+packages:
+  - vim
+  - git
+  - curl
+
+users:
+  - name: devops
+    shell: /bin/bash
+  - name: deployer
+    shell: /bin/zsh
+
+app_env:
+  APP_MODE: production
+  APP_DEBUG: "false"
+  APP_WORKERS: "4"
+
+endpoints:
+  - "http://app1.local/health"
+  - "http://app2.local/health"
+  - "http://app3.local/health"
