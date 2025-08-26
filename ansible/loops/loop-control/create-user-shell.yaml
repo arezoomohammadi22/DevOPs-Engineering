@@ -1,0 +1,17 @@
+- hosts: all
+  become: true
+  vars:
+    users:
+      - name: devops
+        shell: /bin/bash
+      - name: deployer
+        shell: /bin/zsh
+
+  tasks:
+    - name: Create users
+      ansible.builtin.user:
+        name: "{{ usr.name }}"
+        shell: "{{ usr.shell }}"
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: usr
