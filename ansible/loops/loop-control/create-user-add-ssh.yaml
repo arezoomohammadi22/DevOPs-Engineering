@@ -1,0 +1,39 @@
+# users-ssh-keys.yml
+- name: Ensure users exist and add their SSH authorized_keys
+  hosts: all
+  become: true
+  gather_facts: false
+
+  vars:
+    users:
+      - name: devops
+        shell: /bin/bash
+        keys:
+          - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCDEVOPSKEY111 example-devops-key1"
+          - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCDEVOPSKEY222 example-devops-key2"
+      - name: deployer
+        shell: /bin/zsh
+        keys:
+          - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCDEPLOYERKEY333 example-deployer-key1"
+
+  tasks:
+    - name: Ensure users are present
+      ansible.builtin.user:
+        name: "{{ usr.name }}"
+        shell: "{{ usr.shell }}"
+        state: present
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: usr
+        label: "{{ usr.name }}"
+
+    - name: Add authorized keys for each user's keys
+      ansible.builtin.authorized_key:
+        user: "{{ pair.0.name }}"
+        key: "{{ pair.1 }}"
+        state: present
+        manage_dir: true      # .ssh را در صورت نبود می‌سازد (0700) و authorized_keys را هم می‌سازد/به‌روز می‌کند
+      loop: "{{ query('subelements', users, 'keys') }}"
+      loop_control:
+        loop_var: pair
+        label: "{{ pair.0.name }}"
