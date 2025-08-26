@@ -1,0 +1,8 @@
+---
+# Single entrypoint playbook requested: project.yaml
+- name: Ansible Loops Demo
+  hosts: all
+  become: true
+
+  roles:
+    - role: common

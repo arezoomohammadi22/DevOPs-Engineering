@@ -1,0 +1,45 @@
+---
+# 'common' role demonstrating best-practice loops
+
+- name: Ensure common packages are installed (simple list loop)
+  ansible.builtin.package:
+    name: "{{ pkg }}"
+    state: present
+  loop: "{{ packages }}"
+  loop_control:
+    loop_var: pkg
+    label: "{{ pkg }}"
+  tags: ['packages']
+
+- name: Ensure users are present (loop over dicts)
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    shell: "{{ item.shell }}"
+    state: present
+  loop: "{{ users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: ['users']
+
+- name: Deploy /etc/motd once per host but show loop usage with label (educational)
+  ansible.builtin.template:
+    src: motd.j2
+    dest: /etc/motd
+    owner: root
+    group: root
+    mode: '0644'
+  # Demonstrates loop_control label for readable output (loops over a single-item list)
+  loop: ["motd"]
+  loop_control:
+    label: "render {{ item }} for {{ inventory_hostname }}"
+  tags: ['motd']
+
+- name: Add authorized keys for each user's keys (modern subelements with query)
+  ansible.builtin.authorized_key:
+    user: "{{ item.0.name }}"
+    key: "{{ item.1 }}"
+    state: present
+  loop: "{{ query('subelements', users, 'keys') }}"
+  loop_control:
+    label: "{{ item.0.name }}"
+  tags: ['ssh']

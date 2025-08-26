@@ -1,0 +1,21 @@
+---
+# Variables used by the 'common' role to demonstrate loops
+
+# Example 1: package list (simple list loop)
+packages:
+  - vim
+  - curl
+  - git
+  - htop
+
+# Example 2 and 4: users as a list of dicts (structured loop + subelements)
+users:
+  - name: "devops"
+    shell: "/bin/bash"
+    keys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCDEVOPSKEY111 example-devops-1"
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCDEVOPSKEY222 example-devops-2"
+  - name: "deployer"
+    shell: "/bin/zsh"
+    keys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCDEPLOYERKEY333 example-deployer-1"
