@@ -1,0 +1,6 @@
+# متغیرهای غیرحساس
+install_docker: true               # اگر Docker روی سرور نصب است، false کن
+mysql_container_name: mysql
+mysql_image: mysql:8.0
+mysql_bind_port: 3306              # پورت روی هاست
+mysql_db: demo                     # دیتابیس اولیه که ساخته می‌شود

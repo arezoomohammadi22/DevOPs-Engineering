@@ -1,0 +1,4 @@
+# این فایل را با ansible-vault encrypt رمزنگاری کن
+mysql_root_password: "StrongRootPass123!"
+mysql_user: "demo_user"
+mysql_password: "StrongUserPass456!"

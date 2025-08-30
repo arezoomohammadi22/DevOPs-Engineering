@@ -1,0 +1,64 @@
+---
+- name: Install Docker (Debian/Ubuntu) if requested
+  apt:
+    name:
+      - docker.io
+      - python3-pip
+    update_cache: yes
+    state: present
+  become: yes
+  when:
+    - install_docker | bool
+    - ansible_facts.os_family == "Debian"
+
+- name: Ensure Docker service is running
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Install Docker SDK for Python (for Ansible to talk to Docker)
+  pip:
+    name: docker
+    state: present
+  become: yes
+
+- name: Pull MySQL image
+  community.docker.docker_image:
+    name: "{{ mysql_image }}"
+    source: pull
+  become: yes
+
+- name: Create a volume for MySQL data
+  community.docker.docker_volume:
+    name: mysql_data
+    state: present
+  become: yes
+
+- name: Run MySQL container (env contains secrets)
+  community.docker.docker_container:
+    name: "{{ mysql_container_name }}"
+    image: "{{ mysql_image }}"
+    state: started
+    restart_policy: unless-stopped
+    ports:
+      - "{{ mysql_bind_port }}:3306"
+    volumes:
+      - "mysql_data:/var/lib/mysql"
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    env:
+      MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
+      MYSQL_DATABASE: "{{ mysql_db }}"
+      MYSQL_USER: "{{ mysql_user }}"
+      MYSQL_PASSWORD: "{{ mysql_password }}"
+  become: yes
+  no_log: true   # جلوگیری از نمایش پسوردها در لاگ
+
+- name: Wait for MySQL to be ready
+  wait_for:
+    host: "127.0.0.1"
+    port: "{{ mysql_bind_port }}"
+    delay: 5
+    timeout: 120
+  become: yes

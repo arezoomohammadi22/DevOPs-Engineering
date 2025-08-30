@@ -1,0 +1,6 @@
+---
+- name: Launch MySQL in Docker with Vaulted secrets
+  hosts: mysql
+  become: yes
+  roles:
+    - mysql_docker

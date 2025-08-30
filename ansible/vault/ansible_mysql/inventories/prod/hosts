@@ -1,0 +1,2 @@
+[mysql]
+mysql-01 ansible_host=203.0.113.30 ansible_user=ubuntu
