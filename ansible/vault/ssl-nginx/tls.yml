@@ -1,0 +1,6 @@
+---
+- name: Provision Nginx with vaulted TLS key
+  hosts: web
+  become: yes
+  roles:
+    - nginx_tls

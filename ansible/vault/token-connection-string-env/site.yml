@@ -1,0 +1,6 @@
+---
+- name: Deploy app with vaulted DB creds
+  hosts: app
+  become: yes
+  roles:
+    - app

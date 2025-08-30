@@ -1,0 +1,41 @@
+---
+- name: Ensure app directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ app_dir }}"
+    - "{{ app_dir }}/shared"
+    - "{{ app_dir }}/current"
+
+- name: Install runtime deps
+  apt:
+    name:
+      - python3-venv
+      - python3-pip
+      - postgresql-client
+    update_cache: yes
+  become: yes
+
+- name: Create virtualenv
+  command: "python3 -m venv {{ app_venv }}"
+  args:
+    creates: "{{ app_venv }}/bin/activate"
+
+- name: Render app .env (contains secrets)
+  template:
+    src: ".env.j2"
+    dest: "{{ app_dir }}/shared/.env"
+    owner: root
+    group: root
+    mode: "0640"
+  no_log: true
+
+- name: Install app requirements
+  pip:
+    requirements: "{{ app_dir }}/current/requirements.txt"
+    virtualenv: "{{ app_venv }}"
+  when: false

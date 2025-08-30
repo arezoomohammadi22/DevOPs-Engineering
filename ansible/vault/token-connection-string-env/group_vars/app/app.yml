@@ -1,0 +1,5 @@
+app_name: myshop
+app_dir: /opt/myshop
+app_venv: /opt/myshop/venv
+db_host: 10.0.0.12
+db_name: myshopdb

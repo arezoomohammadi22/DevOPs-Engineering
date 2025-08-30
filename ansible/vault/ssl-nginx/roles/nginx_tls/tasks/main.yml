@@ -1,0 +1,59 @@
+---
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Ensure SSL dir
+  file:
+    path: /etc/nginx/ssl
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+
+- name: Deploy fullchain.pem
+  copy:
+    src: "files/ssl/fullchain.pem"
+    dest: "/etc/nginx/ssl/fullchain.pem"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+
+- name: Deploy private.key (vaulted)
+  copy:
+    src: "files/ssl/private.key"
+    dest: "/etc/nginx/ssl/private.key"
+    owner: root
+    group: root
+    mode: "0600"
+  become: yes
+  no_log: true
+
+- name: Deploy site config
+  template:
+    src: "site.conf.j2"
+    dest: "/etc/nginx/sites-available/example.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+
+- name: Enable site
+  file:
+    src: "/etc/nginx/sites-available/example.conf"
+    dest: "/etc/nginx/sites-enabled/example.conf"
+    state: link
+  notify: Reload Nginx
+  become: yes
+
+- name: Disable default site
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+  notify: Reload Nginx
+  become: yes
