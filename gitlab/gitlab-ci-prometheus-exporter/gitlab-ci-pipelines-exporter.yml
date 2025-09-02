@@ -1,0 +1,20 @@
+gitlab:
+  url: https://gitlab.sananetco.com
+  token: token  # scope: read_api
+# Enable job-level metrics too (needed for Grafana 13328)
+project_defaults:
+  pull:
+    pipeline:
+      jobs:
+        enabled: true
+
+projects:
+  - name: devops-scenarios/gitops-example01
+    pull:
+      pipeline:
+        jobs:
+          enabled: true   # اطمینان از فعال بودن متریک‌های job
+log:
+  level: info
+server:
+  listen_address: 0.0.0.0:8080
