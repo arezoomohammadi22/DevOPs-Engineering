@@ -1,0 +1,3 @@
+variable "namespace" { type = string }
+variable "replicas"  { type = number }
+variable "image"     { type = string }
