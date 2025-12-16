@@ -1,0 +1,18 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nginx-demo-https
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`app02.sananetco.com`)
+      kind: Rule
+      middlewares:
+        - name: ratelimit
+      services:
+        - name: nginx-demo
+          port: 80
+  tls:
+    secretName: nginx-demo-tls
