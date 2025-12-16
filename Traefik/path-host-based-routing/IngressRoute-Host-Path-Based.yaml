@@ -1,0 +1,19 @@
+routes:
+  - match: HostRegexp(`{subdomain:[a-z]+}.example.com`) && PathRegexp(`/api/.*`)
+    kind: Rule
+    services:
+      - name: my-api
+        port: 80
+
+---
+routes:
+  - match: PathRegexp(`/api/v1/.*`)
+    kind: Rule
+    services:
+      - name: api-v1
+        port: 80
+  - match: PathRegexp(`/api/v2/.*`)
+    kind: Rule
+    services:
+      - name: api-v2
+        port: 80
