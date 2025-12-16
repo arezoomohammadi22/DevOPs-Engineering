@@ -1,0 +1,6 @@
+routes:
+  - match: HostRegexp(`{subdomain:[a-z]+}.example.com`)
+    kind: Rule
+    services:
+      - name: subdomain-service
+        port: 80
