@@ -1,0 +1,6 @@
+routes:
+  - match: PathRegexp(`/api/v[0-9]+/.*`)
+    kind: Rule
+    services:
+      - name: my-api
+        port: 80
