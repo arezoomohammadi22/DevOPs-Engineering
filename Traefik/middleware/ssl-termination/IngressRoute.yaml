@@ -1,0 +1,31 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nginx-demo-http
+spec:
+  entryPoints:
+    - web   # HTTP
+  routes:
+    - match: Host(`app02.sananetco.com`)
+      kind: Rule
+      middlewares:
+        - name: redirect-to-https
+      services:
+        - name: nginx-demo
+          port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nginx-demo-https
+spec:
+  entryPoints:
+    - websecure   # HTTPS
+  routes:
+    - match: Host(`app02.sananetco.com`)
+      kind: Rule
+      services:
+        - name: nginx-demo
+          port: 80
+  tls:
+    secretName: nginx-demo-tls
