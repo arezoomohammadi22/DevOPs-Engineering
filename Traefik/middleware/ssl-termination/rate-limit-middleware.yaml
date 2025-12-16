@@ -1,0 +1,9 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit
+  namespace: default
+spec:
+  rateLimit:
+    average: 5       # میانگین 5 درخواست در ثانیه
+    burst: 10        # اجازه 10 درخواست پشت سر هم (burst)
