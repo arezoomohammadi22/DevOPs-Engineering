@@ -1,0 +1,40 @@
+stages:
+  - build
+  - deploy
+
+build-and-push:
+  stage: build
+  tags:
+    - k8s
+  image: docker:27
+  services:
+    - name: docker:27-dind
+      command: ["--tls=false"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
+  script:
+    - docker info
+    - cat /etc/hosts
+
+    - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+    - docker build -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" -t "$CI_REGISTRY_IMAGE:latest" .
+    - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+    - docker push "$CI_REGISTRY_IMAGE:latest"
+
+
+deploy:
+  image: docker.arvancloud.ir/dtzar/helm-kubectl:latest
+  stage: deploy
+  tags: 
+    - k8s
+  script:
+    - kubectl config get-contexts
+    - kubectl config use-context devops-cource/devtest01:k8s-connection
+    - kubectl apply -f deployment.yaml -n default
+  environment:
+    name: production
+    url: https://app.sananetco.com
+    kubernetes:
+      agent: devops-cource/devtest01:k8s-connection
