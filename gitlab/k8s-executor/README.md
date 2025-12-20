@@ -58,7 +58,7 @@ The following command installs (or upgrades) GitLab Runner using the **Kubernete
 helm upgrade --install gitlab-runner gitlab/gitlab-runner \
   -n gitlab-runner --create-namespace \
   --set gitlabUrl=https://gitlab.sananetco.com \
-  --set runnerRegistrationToken=Eaw8FLXAANVERXmqkExL \
+  --set runnerRegistrationToken='TOKEN' \
   --set rbac.create=true \
   --set serviceAccount.create=true \
   --set runners.executor=kubernetes \
