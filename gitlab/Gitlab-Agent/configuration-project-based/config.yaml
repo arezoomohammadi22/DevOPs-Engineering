@@ -1,5 +1,11 @@
 ci_access:
   projects:
-    - id: "devops/example01"   # or another project that will deploy
-      access_as:
-        ci_job: {}
+    - id: "devops-cource/devtest02"
+    - id: "devops-cource/devtest03"
+
+user_access:
+  access_as:
+    agent: {}
+  projects:
+    - id: "devops-cource/devtest02"
+    - id: "devops-cource/devtest03"
