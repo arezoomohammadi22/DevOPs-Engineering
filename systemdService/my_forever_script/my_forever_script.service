@@ -1,0 +1,14 @@
+[Unit]
+Description=My Forever Running Script
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/my_forever_script.sh
+Restart=always
+User=root
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=my_forever_script
+
+[Install]
+WantedBy=multi-user.target
