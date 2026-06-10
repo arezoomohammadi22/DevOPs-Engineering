@@ -1,31 +1,190 @@
-# Docker Networking — Complex Practice
+# Docker Networking Practice — docker run
 
-## Scenario: Multi-Tier Web Application with Isolated Networks
-
-You will build a 3-tier architecture:
+## Architecture
 
 ```
 [Browser]
     │
     ▼
-[Nginx - Reverse Proxy]  ← public network (frontend)
-    │
-    ▼
-[Flask App]              ← both networks (frontend + backend)
-    │
-    ▼
-[PostgreSQL DB]          ← private network (backend only)
+[Nginx :8080]  ──── frontend network ────  [Flask :5000]
+                                                │
+                                         backend network
+                                                │
+                                          [Postgres :5432]
 ```
 
-**Rules:**
-- Nginx is the only container exposed to the host
-- Flask can talk to both Nginx and PostgreSQL
-- PostgreSQL is completely isolated from the outside — only Flask can reach it
-- If you try to ping PostgreSQL from Nginx, it must fail
+| Container | Networks           | Host Port |
+|-----------|--------------------|-----------|
+| nginx     | frontend           | 8080 → 80 |
+| flask     | frontend + backend | none      |
+| postgres  | backend            | none      |
 
 ---
 
-## Step 1 — Create Two Isolated Networks
+## Directory Structure
+
+```
+docker-networking-practice/
+├── flask-app/
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── app.py
+└── nginx-proxy/
+    ├── Dockerfile
+    └── nginx.conf
+```
+
+---
+
+## Files
+
+### `flask-app/Dockerfile`
+```dockerfile
+FROM docker.arvancloud.ir/python:3.12-alpine
+
+RUN apk add --no-cache gcc musl-dev libpq-dev wget
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY app.py .
+
+CMD ["python", "app.py"]
+```
+
+### `flask-app/requirements.txt`
+```
+flask
+psycopg2-binary
+```
+
+### `flask-app/app.py`
+```python
+import os
+import psycopg2
+import psycopg2.extras
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+DB = dict(
+    host=os.environ["DB_HOST"],
+    dbname=os.environ["DB_NAME"],
+    user=os.environ["DB_USER"],
+    password=os.environ["DB_PASS"],
+)
+
+def conn():
+    return psycopg2.connect(**DB)
+
+def ensure_table(c):
+    with c.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS items (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        """)
+    c.commit()
+
+@app.route("/")
+def index():
+    return jsonify({"status": "ok"})
+
+@app.route("/items", methods=["POST"])
+def create():
+    data = request.get_json() or {}
+    if not data.get("name"):
+        return jsonify({"error": "name is required"}), 400
+    c = conn(); ensure_table(c)
+    with c.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute(
+            "INSERT INTO items (name, description) VALUES (%s,%s) RETURNING *",
+            (data["name"], data.get("description"))
+        )
+        row = dict(cur.fetchone())
+    c.commit(); c.close()
+    row["created_at"] = str(row["created_at"])
+    return jsonify(row), 201
+
+@app.route("/items", methods=["GET"])
+def list_all():
+    c = conn(); ensure_table(c)
+    with c.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute("SELECT * FROM items ORDER BY id")
+        rows = [dict(r) for r in cur.fetchall()]
+    c.close()
+    for r in rows: r["created_at"] = str(r["created_at"])
+    return jsonify(rows)
+
+@app.route("/items/<int:id>", methods=["GET"])
+def get_one(id):
+    c = conn()
+    with c.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute("SELECT * FROM items WHERE id=%s", (id,))
+        row = cur.fetchone()
+    c.close()
+    if not row: return jsonify({"error": "not found"}), 404
+    row = dict(row); row["created_at"] = str(row["created_at"])
+    return jsonify(row)
+
+@app.route("/items/<int:id>", methods=["PUT"])
+def update(id):
+    data = request.get_json() or {}
+    c = conn()
+    with c.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute(
+            "UPDATE items SET name=COALESCE(%s,name), description=COALESCE(%s,description) WHERE id=%s RETURNING *",
+            (data.get("name"), data.get("description"), id)
+        )
+        row = cur.fetchone()
+    if not row: c.close(); return jsonify({"error": "not found"}), 404
+    c.commit(); c.close()
+    row = dict(row); row["created_at"] = str(row["created_at"])
+    return jsonify(row)
+
+@app.route("/items/<int:id>", methods=["DELETE"])
+def delete(id):
+    c = conn()
+    with c.cursor() as cur:
+        cur.execute("DELETE FROM items WHERE id=%s RETURNING id", (id,))
+        deleted = cur.fetchone()
+    if not deleted: c.close(); return jsonify({"error": "not found"}), 404
+    c.commit(); c.close()
+    return jsonify({"deleted": id})
+
+app.run(host="0.0.0.0", port=5000)
+```
+
+---
+
+### `nginx-proxy/Dockerfile`
+```dockerfile
+FROM docker.arvancloud.ir/nginx:alpine
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+```
+
+### `nginx-proxy/nginx.conf`
+```nginx
+server {
+    listen 80;
+    location / {
+        proxy_pass http://flask:5000;
+        proxy_set_header Host $host;
+    }
+    location /health {
+        return 200 "nginx ok\n";
+        add_header Content-Type text/plain;
+    }
+}
+```
+
+---
+
+## Step 1 — Create Networks
 
 ```bash
 docker network create frontend
@@ -37,19 +196,9 @@ Verify:
 docker network ls
 ```
 
-Expected output includes:
-```
-NETWORK ID     NAME       DRIVER    SCOPE
-xxxxxxxxxxxx   frontend   bridge    local
-xxxxxxxxxxxx   backend    bridge    local
-```
-
-**Why two networks?**
-Each network is an isolated broadcast domain. Containers on `frontend` cannot see containers on `backend` unless explicitly connected to both.
-
 ---
 
-## Step 2 — Create the PostgreSQL Container (backend only)
+## Step 2 — Start PostgreSQL
 
 ```bash
 docker run -d \
@@ -58,97 +207,26 @@ docker run -d \
   -e POSTGRES_USER=appuser \
   -e POSTGRES_PASSWORD=secret \
   -e POSTGRES_DB=appdb \
-  postgres:15-alpine
+  -v pgdata:/var/lib/postgresql/data \
+  docker.arvancloud.ir/postgres:15-alpine
 ```
 
-Verify it started:
+Wait until ready:
 ```bash
-docker ps
 docker logs postgres
+# wait for: "database system is ready to accept connections"
 ```
-
-Wait for this line in logs:
-```
-database system is ready to accept connections
-```
-
-**Key point:** This container is attached **only** to `backend`. Nothing on `frontend` can reach it.
 
 ---
 
-## Step 3 — Create the Flask App
+## Step 3 — Build and Start Flask
 
-First, create a working directory:
 ```bash
-mkdir ~/flask-app && cd ~/flask-app
-```
-
-**`app.py`:**
-```python
-from flask import Flask
-import psycopg2
-import os
-
-app = Flask(__name__)
-
-def get_db():
-    return psycopg2.connect(
-        host=os.environ["DB_HOST"],
-        dbname=os.environ["DB_NAME"],
-        user=os.environ["DB_USER"],
-        password=os.environ["DB_PASS"]
-    )
-
-@app.route("/")
-def index():
-    return "<h2>Flask is running</h2>"
-
-@app.route("/db")
-def db_check():
-    try:
-        conn = get_db()
-        cur = conn.cursor()
-        cur.execute("SELECT version();")
-        version = cur.fetchone()[0]
-        conn.close()
-        return f"<h2>Connected to DB</h2><p>{version}</p>"
-    except Exception as e:
-        return f"<h2>DB Error</h2><p>{str(e)}</p>", 500
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
-```
-
-**`requirements.txt`:**
-```
-flask
-psycopg2-binary
-```
-
-**`Dockerfile`:**
-```dockerfile
-FROM python:3.12-alpine
-
-RUN apk add --no-cache gcc musl-dev libpq-dev
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY app.py .
-
-EXPOSE 5000
-
-CMD ["python", "app.py"]
-```
-
-Build the image:
-```bash
+cd flask-app
 docker build -t flask-app .
+cd ..
 ```
 
-Run the container — attach it to **both** networks:
 ```bash
 docker run -d \
   --name flask \
@@ -160,52 +238,21 @@ docker run -d \
   flask-app
 ```
 
-Now connect it to `backend` as well:
+Connect flask to backend network too:
 ```bash
 docker network connect backend flask
 ```
 
-Verify Flask can reach PostgreSQL:
-```bash
-docker exec flask ping -c 2 postgres
-```
-
-Expected: ping succeeds.
-
 ---
 
-## Step 4 — Create the Nginx Reverse Proxy
+## Step 4 — Build and Start Nginx
 
-Create an Nginx config:
 ```bash
-mkdir ~/nginx-proxy && cd ~/nginx-proxy
-```
-
-**`nginx.conf`:**
-```nginx
-server {
-    listen 80;
-
-    location / {
-        proxy_pass http://flask:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-**`Dockerfile`:**
-```dockerfile
-FROM nginx:alpine
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-```
-
-Build:
-```bash
+cd nginx-proxy
 docker build -t nginx-proxy .
+cd ..
 ```
 
-Run — attach only to `frontend`, publish port 80:
 ```bash
 docker run -d \
   --name nginx \
@@ -216,114 +263,68 @@ docker run -d \
 
 ---
 
-## Step 5 — Test the Full Stack
+## Test
 
-**Test 1 — Home route through Nginx:**
 ```bash
+# Health
 curl http://localhost:8080/
-```
-Expected:
-```html
-<h2>Flask is running</h2>
-```
+curl http://localhost:8080/health
 
-**Test 2 — DB route through Nginx → Flask → PostgreSQL:**
-```bash
-curl http://localhost:8080/db
-```
-Expected:
-```html
-<h2>Connected to DB</h2>
-<p>PostgreSQL 15.x ...</p>
-```
+# Create
+curl -X POST http://localhost:8080/items \
+  -H "Content-Type: application/json" \
+  -d '{"name":"apple","description":"a red fruit"}'
 
-**Test 3 — Verify Nginx CANNOT reach PostgreSQL directly:**
-```bash
-docker exec nginx ping -c 2 postgres
-```
-Expected:
-```
-ping: bad address 'postgres'
-```
+# List all
+curl http://localhost:8080/items
 
-This confirms the isolation is working. Nginx is on `frontend` only — it has no route to `postgres` which lives on `backend` only.
+# Get one
+curl http://localhost:8080/items/1
 
-**Test 4 — Verify Flask CAN reach both:**
-```bash
-docker exec flask ping -c 2 postgres    # backend — should succeed
-docker exec flask ping -c 2 nginx       # frontend — should succeed
+# Update
+curl -X PUT http://localhost:8080/items/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"green apple"}'
+
+# Delete
+curl -X DELETE http://localhost:8080/items/1
 ```
 
 ---
 
-## Step 6 — Inspect the Network Topology
+## Verify Network Isolation
 
 ```bash
-docker network inspect frontend
+# Nginx CANNOT reach postgres (should fail)
+docker exec nginx ping -c 2 postgres
+
+# Flask CAN reach postgres (should succeed)
+docker exec flask ping -c 2 postgres
+
+# Flask CAN reach nginx (should succeed)
+docker exec flask ping -c 2 nginx
 ```
 
-Look at the `Containers` section — you should see only `nginx` and `flask`.
+---
+
+## Inspect Networks
 
 ```bash
+# Should show only nginx + flask
+docker network inspect frontend
+
+# Should show only flask + postgres
 docker network inspect backend
 ```
 
-You should see only `flask` and `postgres`.
-
-This is your security boundary in action.
-
 ---
 
-## Step 7 — Simulate a Security Test
-
-Try to reach PostgreSQL's port directly from Nginx:
-```bash
-docker exec nginx sh -c "apk add --no-cache netcat-openbsd && nc -zv postgres 5432"
-```
-Expected:
-```
-nc: bad address 'postgres'
-```
-
-Now try the same from Flask:
-```bash
-docker exec flask sh -c "nc -zv postgres 5432"
-```
-Expected:
-```
-postgres (172.x.x.x:5432) open
-```
-
-Flask can reach the database. Nginx cannot. Network isolation is verified.
-
----
-
-## Step 8 — Clean Up
+## Clean Up
 
 ```bash
 docker stop nginx flask postgres
 docker rm nginx flask postgres
 docker rmi nginx-proxy flask-app
 docker network rm frontend backend
-docker volume prune -f
+docker volume rm pgdata
 ```
-
----
-
-## Summary
-
-| Container | Networks | Host Port |
-|-----------|----------|-----------|
-| nginx | frontend | 8080 → 80 |
-| flask | frontend + backend | none |
-| postgres | backend | none |
-
-**What you practiced:**
-- Creating multiple isolated bridge networks
-- Connecting a container to more than one network
-- Using container names as DNS hostnames
-- Enforcing network-level isolation (DB unreachable from Nginx)
-- Building a reverse proxy in front of an app container
-- Verifying isolation with `ping` and `nc`
-
-This pattern — DMZ frontend, private backend — is the foundation of secure container networking in production.
