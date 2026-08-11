@@ -1,8 +1,10 @@
 import os
+import requests
 import subprocess
 from flask import Flask, request
 from flask_mail import Mail, Message
-import requests
+
+
 app = Flask(__name__)
 
 app.config['MAIL_SERVER'] = 'Mail.sananetco.com'
@@ -19,8 +21,10 @@ mail = Mail(app)
 def run_script():
     # Path to your Python script file
     script_path = 'renew_ip.py'
+
     # Run the script as a subprocess
     output = subprocess.check_output(['python3', script_path])
+
     return output.decode('utf-8')
 
 
@@ -30,8 +34,10 @@ def email():
     recipients = data.get('recipients', [])
     body = data.get('body', '')
     subject = data.get('subject', 'notification')
+
     if not recipients:
         return 'Please provide at least one recipient.', 400
+    
     msg = Message(
         subject=subject,
         sender='notification@yourdomain',
@@ -39,6 +45,7 @@ def email():
     )
     msg.body = body or 'Hello Flask message sent from Flask-Mail'
     mail.send(msg)
+
     return 'Sent'
 
 
@@ -48,6 +55,7 @@ def attach():
     recipients = data.get('recipients', [])
     body = data.get('body', '')
     subject = data.get('subject', 'notification')
+
     if not recipients:
         return 'Please provide at least one recipient.', 400
 
@@ -78,10 +86,12 @@ def createuser():
     username = data.get('username')
     namespace = data.get('namespace')
     email = data.get('email')
+    
     # Run the script to create the user
     script_path = 'accesstouser.py'
+
     output = subprocess.check_output(['python3', script_path, username, namespace])
-    result = output.decode('utf-8')
+    # result = output.decode('utf-8')
 
     # Call the attach() endpoint to send the config file as an attachment
     attach_data = {
@@ -89,12 +99,15 @@ def createuser():
         'subject': 'Config file',
         'body': 'Please find attached the config file for your project'
     }
+
     response = requests.post('http://localhost:3000/attach', json=attach_data)
+
     if response.status_code == 200:
-     return 'Config file has been sent successfully'
+        return 'Config file has been sent successfully'
     else:
         if response.status_code != 200:
             return 'Error sending config file', response.status_code
+    
     return 'Unknown error occurred'
 
 
@@ -103,16 +116,20 @@ def rbac():
     data = request.get_json()
     username = data.get('username')
     namespace = data.get('namespace')
+
     # Run the script to create the user
     script_path = 'rbac.py'
     output = subprocess.check_output(['python3', script_path, username, namespace])
     result = output.decode('utf-8')
+
     return result
+
 
 @app.route('/telegram', methods=['POST'])
 def handle_telegram_alert():
     alert = request.json
     handle_alert(alert)
+
     return 'OK'
 
 @app.route('/createvm', methods=['POST'])
@@ -120,8 +137,8 @@ def create():
     script_path = 'crawler.py'
     # Run the script as a subprocess
     output = subprocess.check_output(['python3', script_path])
-    return output.decode('utf-8')
 
+    return output.decode('utf-8')
 
 
 if __name__ == "__main__":
